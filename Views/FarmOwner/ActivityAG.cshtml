@@ -1,0 +1,513 @@
+﻿@model  List<AgroClassLib.FarmOwner.FarmActivitiesAG>
+
+@{
+    ViewBag.Title = "ActivityAG";
+    Layout = "~/Views/Shared/FarmOwner.cshtml";
+}
+<style>
+    #editActivityModal .modal-content {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+    }
+</style>
+<h2>Index</h2>
+
+<button class="btn btn-success" onclick="OpenAddModal()">
+    + Add Activity
+</button>
+
+<table id="dataTable"
+       class="table table-bordered display"
+       style="width:100%">
+
+    <thead>
+        <tr>
+            <th>Sr No.</th>
+            <th>Name</th>
+            <th>Duration</th>
+            <th>Price</th>
+            <th>Start Date</th>
+            <th>End Date</th>
+            <th>Description</th>
+            <th>Image</th>
+            <th>Status</th>
+            <th style="width:150px;">Action</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        @{ int sr = 1; }
+
+        @foreach (var item in Model)
+        {
+            <tr>
+
+                <td>@sr</td>
+
+                <td>@item.ActivityName</td>
+
+                <td>@item.Duration</td>
+
+                <td>@item.Price</td>
+
+                <td>@(item.StartDate?.ToString("yyyy-MM-dd"))</td>
+
+                <td>@(item.EndDate?.ToString("yyyy-MM-dd"))</td>
+
+                <td>@item.Description</td>
+                <td>
+                    @if (!string.IsNullOrEmpty(item.ImagePath))
+                    {
+                        <img src="@item.ImagePath" style="width:80px;height:55px;object-fit:cover;border-radius:6px;">
+                    }
+                </td>
+
+                <td>
+                    <input type="checkbox"
+                           onchange="ToggleStatus(@item.ActivityId,this.checked)"
+                           @(item.IsActive ? "checked" : "") />
+                </td>
+
+                <td>
+                    <div style="display:flex;gap:6px;justify-content:center;white-space:nowrap;">
+
+                        <button class="btn btn-sm btn-primary"
+                                onclick="EditActivity(@item.ActivityId)">
+                            Edit
+                        </button>
+
+                        <button class="btn btn-sm btn-danger"
+                                onclick="DeleteActivity(@item.ActivityId)">
+                            Delete
+                        </button>
+
+                    </div>
+                </td>
+
+            </tr>
+            sr++;
+        }
+
+    </tbody>
+
+</table>
+
+<div id="addActivityModal" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header text-bg-success text-white">
+                <h5 class="modal-title">Add Activity</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="container-fluid">
+
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-semibold">Start Date</label>
+                        <div class="col-sm-8">
+                            <input type="date" id="StartDate" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-semibold">End Date</label>
+                        <div class="col-sm-8">
+                            <input type="date" id="EndDate" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-semibold">Activity Name</label>
+                        <div class="col-sm-8">
+                            <input type="text" id="ActivityName" class="form-control" placeholder="Enter activity name">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-semibold">Duration</label>
+                        <div class="col-sm-8">
+                            <input type="text" id="Duration" class="form-control" placeholder="Example: 2 hours">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-semibold">Price</label>
+                        <div class="col-sm-8">
+                            <input type="number" id="Price" class="form-control" placeholder="Enter price">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-semibold">Description</label>
+                        <div class="col-sm-8">
+                            <textarea id="Description" rows="3" class="form-control"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-semibold">Activity Image</label>
+                        <div class="col-sm-8">
+                            <input type="file" id="ActivityImage" class="form-control" accept=".jpg,.jpeg,.png">
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button class="btn btn-success px-4"
+                        onclick="SaveActivity()">
+                    Save
+                </button>
+
+                <button class="btn btn-secondary px-4"
+                        data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<div id="editActivityModal" class="modal fade">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+
+            <div class="modal-header text-bg-warning text-black">
+                <h5 class="modal-title">Edit Activity</h5>
+                <button type="button" class="btn-close btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="container-fluid">
+
+                    <input type="hidden" id="EditActivityId">
+                    <input type="hidden" id="EditFarmHouseCode">
+                    <input type="hidden" id="EditActivityCode">
+
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-semibold">Start Date</label>
+                        <div class="col-sm-8">
+                            <input type="date" id="EditStartDate" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-semibold">End Date</label>
+                        <div class="col-sm-8">
+                            <input type="date" id="EditEndDate" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-semibold">Activity Name</label>
+                        <div class="col-sm-8">
+                            <input type="text" id="EditActivityName" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-semibold">Duration</label>
+                        <div class="col-sm-8">
+                            <input type="text" id="EditDuration" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-semibold">Price</label>
+                        <div class="col-sm-8">
+                            <input type="number" id="EditPrice" class="form-control">
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-semibold">Description</label>
+                        <div class="col-sm-8">
+                            <textarea id="EditDescription" rows="3" class="form-control"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-semibold">Image</label>
+                        <div class="col-sm-8">
+                            <input class="form-control" type="file" id="EditImage" accept=".jpg,.jpeg,.png">
+                            <br />
+                            <img id="EditPreviewImage" style="width:90px;height:60px;display:none;border-radius:5px;object-fit:cover;" />
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+
+                <button class="btn btn-success px-4"
+                        onclick="UpdateActivity()">
+                    Update
+                </button>
+
+                <button class="btn btn-secondary px-4"
+                        data-bs-dismiss="modal">
+                    Cancel
+                </button>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section scripts{
+
+    <script>
+        function ShowAlert(type, title, message, reload = false) {
+
+            Swal.fire({
+                icon: type,
+                title: title,
+                text: message,
+                confirmButtonColor: "#27ae60"
+            }).then(() => {
+
+                if (reload)
+                    location.reload();
+            });
+        }
+    </script>
+    <script>
+        function OpenAddModal() {
+
+            $("#StartDate").val("");
+            $("#EndDate").val("");
+            $("#ActivityName").val("");
+            $("#Duration").val("");
+            $("#Price").val("");
+            $("#Description").val("");
+            $("#ActivityImage").val("");
+
+            const modal = new bootstrap.Modal(document.getElementById('addActivityModal'));
+            modal.show();
+        }
+    </script>
+    <script>
+
+        function SaveActivity() {
+
+            var btn = document.activeElement;
+            btn.disabled = true;
+
+            var formData = new FormData();
+
+            formData.append("ActivityName", $("#ActivityName").val());
+            formData.append("Duration", $("#Duration").val());
+            formData.append("Price", $("#Price").val());
+            formData.append("Description", $("#Description").val());
+            formData.append("StartDate", $("#StartDate").val());
+            formData.append("EndDate", $("#EndDate").val());
+
+            var file = $("#ActivityImage")[0].files[0];
+
+            if (file !== undefined) {
+                formData.append("ImageFile", file);
+            }
+
+            $.ajax({
+                url: '/FarmOwner/InsertActivityAG',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function () {
+
+                    ShowAlert(
+                        "success",
+                        "Saved!",
+                        "Activity added successfully",
+                        true
+                    );
+                },
+                complete: function () {
+                    btn.disabled = false;
+                }
+            });
+        }
+
+    </script>
+
+    <script>
+        function EditActivity(id) {
+
+            console.log("Edit clicked:", id);
+
+            $.get('/FarmOwner/GetActivityByIdAG', { id: id }, function (data) {
+
+                console.log(data);
+
+                $("#EditActivityId").val(data.ActivityId);
+                $("#EditFarmHouseCode").val(data.FarmHouseCode);
+                $("#EditActivityCode").val(data.ActivityCode);
+
+                $("#EditActivityName").val(data.ActivityName);
+                $("#EditDuration").val(data.Duration);
+                $("#EditPrice").val(data.Price);
+                $("#EditDescription").val(data.Description);
+
+                if (data.StartDate) {
+                    var sd = new Date(data.StartDate);
+
+                    if (!isNaN(sd.getTime())) {
+                        $("#EditStartDate").val(sd.toISOString().split('T')[0]);
+                    }
+                }
+
+                if (data.EndDate) {
+                    var ed = new Date(data.EndDate);
+
+                    if (!isNaN(ed.getTime())) {
+                        $("#EditEndDate").val(ed.toISOString().split('T')[0]);
+                    }
+                }
+
+                if (data.ImagePath) {
+                    $("#EditPreviewImage").attr("src", data.ImagePath).show();
+                }
+
+                var editModal = new bootstrap.Modal(document.getElementById('editActivityModal'));
+                editModal.show();
+
+            });
+        }
+    </script>
+    <script>
+
+        function UpdateActivity() {
+
+            var formData = new FormData();
+
+            formData.append("ActivityId", $("#EditActivityId").val());
+            formData.append("FarmHouseCode", $("#EditFarmHouseCode").val());
+            formData.append("ActivityCode", $("#EditActivityCode").val());
+            formData.append("ActivityName", $("#EditActivityName").val());
+            formData.append("Duration", $("#EditDuration").val());
+            formData.append("Price", $("#EditPrice").val());
+            formData.append("Description", $("#EditDescription").val());
+            var startDate = $("#EditStartDate").val();
+            var endDate = $("#EditEndDate").val();
+
+            if (startDate && startDate !== "") {
+                formData.append("StartDate", startDate);
+            }
+
+            if (endDate && endDate !== "") {
+                formData.append("EndDate", endDate);
+            }
+
+            var file = $("#EditImage")[0].files[0];
+
+            if (file != undefined) {
+                formData.append("ImageFile", file);
+            }
+
+            $.ajax({
+                url: '/FarmOwner/UpdateActivityAG',
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function () {
+
+                    ShowAlert(
+                        "success",
+                        "Updated!",
+                        "Activity updated successfully",
+                        true
+                    );
+                }
+            });
+        }
+
+    </script>
+    <script>
+        function DeleteActivity(id) {
+
+            Swal.fire({
+                title: "Delete Activity?",
+                text: "This action cannot be undone",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                confirmButtonText: "Yes, delete it"
+            }).then((result) => {
+
+                if (result.isConfirmed) {
+
+                    // Loader
+                    Swal.fire({
+                        title: 'Deleting...',
+                        allowOutsideClick: false,
+                        didOpen: () => {
+                            Swal.showLoading()
+                        }
+                    });
+
+                    $.post('/FarmOwner/DeleteActivityAG',
+                        { id: id },
+                        function () {
+
+                            ShowAlert(
+                                "success",
+                                "Deleted!",
+                                "Activity deleted successfully",
+                                true
+                            );
+
+                        });
+
+                }
+            });
+        }
+    </script>
+    <script>
+        function ToggleStatus(id, status) {
+
+            $.post('/FarmOwner/ToggleActivityAG',
+                {
+                    id: id,
+                    isActive: status
+                },
+                function () {
+
+                    ShowAlert(
+                        "success",
+                        "Status Updated",
+                        "",
+                        false
+                    );
+                });
+        }
+    </script>
+
+    <script>
+
+        $(document).ready(function () {
+
+            $('#dataTable').DataTable({
+                responsive: true,
+                pageLength: 10,
+                ordering: false,
+                lengthChange: true,
+                pagingType: "simple_numbers"
+            });
+
+        });
+
+    </script>
+}

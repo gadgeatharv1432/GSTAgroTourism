@@ -1,0 +1,190 @@
+﻿
+@{
+    ViewBag.Title = "Support";
+    Layout = "~/Views/Shared/Visitor.cshtml";
+}
+
+<!-- ================= SUPPORT HERO ================= -->
+<section class="container mt-5 pt-5">
+    <div class="text-center mb-4">
+        <h3 class="fw-bold">How Can We Help?</h3>
+        <p class="text-muted">Search our knowledge base or browse FAQs</p>
+    </div>
+</section>
+
+<!-- ================= FAQ SECTION ================= -->
+<section class="container mb-5">
+    <h5 class="fw-bold mb-3">Frequently Asked Questions</h5>
+
+    <div class="accordion" id="faqAccordion">
+
+        <!-- FAQ 1 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button" type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#faq1">
+                    How do I get started with Farmhouse?
+                </button>
+            </h2>
+            <div id="faq1" class="accordion-collapse collapse show"
+                 data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    Visit the homepage, explore categories, and create an account
+                    to save preferences and track bookings.
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ 2 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#faq2">
+                    Can I change my account information?
+                </button>
+            </h2>
+            <div id="faq2" class="accordion-collapse collapse"
+                 data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    Yes, go to your profile settings and update your details anytime.
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ 3 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#faq3">
+                    What is the cancellation policy for bookings?
+                </button>
+            </h2>
+            <div id="faq3" class="accordion-collapse collapse"
+                 data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    Cancellation policies depend on the farmhouse listing.
+                    Please check the specific property's cancellation terms.
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ 4 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#faq4">
+                    What payment methods are accepted?
+                </button>
+            </h2>
+            <div id="faq4" class="accordion-collapse collapse"
+                 data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    We accept UPI, Credit/Debit cards, Net Banking and Wallet payments.
+                </div>
+            </div>
+        </div>
+
+        <!-- FAQ 5 -->
+        <div class="accordion-item">
+            <h2 class="accordion-header">
+                <button class="accordion-button collapsed" type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#faq5">
+                    How does Farmhouse ensure my data is safe?
+                </button>
+            </h2>
+            <div id="faq5" class="accordion-collapse collapse"
+                 data-bs-parent="#faqAccordion">
+                <div class="accordion-body">
+                    We use encrypted connections and secure authentication systems
+                    to protect your personal information.
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ================= CONTACT SUPPORT ================= -->
+<section class="container mb-5">
+    <h5 class="fw-bold mb-4">Contact Us</h5>
+
+    <div class="row g-4 text-center">
+
+        <div class="col-md-6">
+            <div class="support-card p-4">
+                <i class="bi bi-envelope fs-3"></i>
+                <h6 class="mt-3">Email Support</h6>
+                <p class="text-muted">Send us your questions and we'll respond promptly.</p>
+                <a href="#" class="btn btn-primary btn-sm">Send Email</a>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="support-card p-4">
+                <i class="bi bi-chat-dots fs-3"></i>
+                <h6 class="mt-3">Live Chat</h6>
+                <p class="text-muted">Chat with a support agent in real-time.</p>
+                <a href="#" class="btn btn-primary btn-sm">Start Chat</a>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+<!-- ================= QUICK LINKS ================= -->
+<section class="container mb-5">
+    <h5 class="fw-bold mb-3">Quick Links</h5>
+
+    <div class="d-flex flex-wrap gap-4">
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
+        <a href="#">Community Guidelines</a>
+        <a href="#">Refund Policy</a>
+    </div>
+</section>
+
+<!-- ================= COMPLAINT FORM ================= -->
+<section class="container mb-5">
+    <h5 class="fw-bold mb-3">Submit a Complaint</h5>
+
+    <div class="complaint-box p-4">
+        <form>
+            <div class="mb-3">
+                <label class="form-label">Farm Name</label>
+                <select class="form-select">
+                    <option>Select farm</option>
+                    <option>Savji Farm</option>
+                    <option>Patilwadi Farm</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Type of Subject</label>
+                <select class="form-select">
+                    <option>Select type</option>
+                    <option>Suggestions</option>
+                    <option>Complaint</option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Subject</label>
+                <input type="text" class="form-control" placeholder="Briefly describe your issue" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea class="form-control" rows="4"
+                          placeholder="Provide detailed information about your issue"></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-success">Submit</button>
+        </form>
+    </div>
+</section>
+
