@@ -14,13 +14,77 @@ namespace GSTAgroTourism.Controllers
     public class FarmOwnerController : Controller
     {
 
+        // For loading the login page (GET request)
+        [HttpGet]
+        public ActionResult Login()
+        {
+            return View();
+        }
+
+
+        // For loading the default landing page
+        public ActionResult Index()
+        {
+            return View();
+        }
+
+
+        // For authenticating user login (FarmOwner or Visitor)
+        [HttpPost]
+        public async Task<ActionResult> Login(LoginRS model)
+        {
+            BALFarmOwner objbalfarm = new BALFarmOwner();
+            DataSet ds = await objbalfarm.Login(model);
+
+            if (ds.Tables[0].Rows.Count > 0)
+            {
+                // OWNER LOGIN
+                Session["UserId"] = ds.Tables[0].Rows[0]["UserId"];
+                Session["Email"] = ds.Tables[0].Rows[0]["Email"];
+                Session["FarmOwnerCode"] = ds.Tables[0].Rows[0]["FarmOwnerCode"].ToString();
+
+                return RedirectToAction("ActivityAG", "FarmOwner");
+            }
+            else if (ds.Tables.Count > 1 && ds.Tables[1].Rows.Count > 0)
+            {
+                // VISITOR LOGIN
+                Session["UserId"] = ds.Tables[1].Rows[0]["UserId"];
+                Session["Email"] = ds.Tables[1].Rows[0]["Email"];
+                Session["VisitorCode"] = ds.Tables[1].Rows[0]["VisitorCode"];
+
+                return RedirectToAction("AboutUs", "Visitor");
+            }
+            else
+            {
+                ViewBag.Message = "Invalid Email or Password";
+                return View("Index");
+            }
+        }
+
+        #region Atharva
+        // For displaying all activities and farmhouse dropdown for the logged-in owner
         public async Task<ActionResult> ActivityAG()
         {
             BALFarmOwner objbalfarm = new BALFarmOwner();
 
-            string FarmHouseCode = "FH001"; // temporary (later from session/login)
+            string ownerCode = Session["FarmOwnerCode"].ToString();
 
-            DataSet ds = await objbalfarm.GetActivitiesAG(FarmHouseCode);
+            DataSet farmDs = await objbalfarm.GetFarmHouseByOwnerAG(ownerCode);
+
+            List<SelectListItem> farmList = new List<SelectListItem>();
+
+            foreach (DataRow dr in farmDs.Tables[0].Rows)
+            {
+                farmList.Add(new SelectListItem
+                {
+                    Value = dr["FarmHouseCode"].ToString(),
+                    Text = dr["FarmHouseName"].ToString()
+                });
+            }
+
+            ViewBag.FarmHouseList = farmList;
+
+            DataSet ds = await objbalfarm.GetActivitiesAG(ownerCode, null);
 
             List<FarmActivitiesAG> list = new List<FarmActivitiesAG>();
 
@@ -33,14 +97,12 @@ namespace GSTAgroTourism.Controllers
                         ActivityId = Convert.ToInt32(dr["ActivityId"]),
                         ActivityCode = dr["ActivityCode"].ToString(),
                         FarmHouseCode = dr["FarmHouseCode"].ToString(),
+                        FarmHouseName = dr["FarmHouseName"].ToString(),
                         ActivityName = dr["ActivityName"].ToString(),
                         Duration = dr["Duration"].ToString(),
                         Price = Convert.ToDecimal(dr["Price"]),
-
-                        StartDate = dr["StartDate"] == DBNull.Value? (DateTime?)null: Convert.ToDateTime(dr["StartDate"]),
-
-                        EndDate = dr["EndDate"] == DBNull.Value? (DateTime?)null: Convert.ToDateTime(dr["EndDate"]),
-
+                        StartDate = dr["StartDate"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(dr["StartDate"]),
+                        EndDate = dr["EndDate"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(dr["EndDate"]),
                         Description = dr["Description"].ToString(),
                         ImagePath = dr["ImagePath"].ToString(),
                         IsActive = Convert.ToBoolean(dr["IsActive"])
@@ -51,16 +113,15 @@ namespace GSTAgroTourism.Controllers
             return View(list);
         }
 
+
+        // For inserting a new activity with image upload
         [HttpPost]
         public async Task<JsonResult> InsertActivityAG(FarmActivitiesAG obj, HttpPostedFileBase ImageFile)
         {
             BALFarmOwner objbalfarm = new BALFarmOwner();
 
-            obj.FarmHouseCode = "FH001";
-
             obj.ActivityCode = "AC" + DateTime.Now.Ticks.ToString().Substring(8);
 
-            // default image path
             obj.ImagePath = "";
 
             if (ImageFile != null && ImageFile.ContentLength > 0)
@@ -86,6 +147,8 @@ namespace GSTAgroTourism.Controllers
             return Json(true);
         }
 
+
+        // For fetching a specific activity by ID (used in Edit modal)
         public async Task<JsonResult> GetActivityByIdAG(int id)
         {
             BALFarmOwner objbalfarm = new BALFarmOwner();
@@ -95,17 +158,15 @@ namespace GSTAgroTourism.Controllers
             return Json(activity, JsonRequestBehavior.AllowGet);
         }
 
+
+        // For updating an existing activity and optionally replacing the image
         [HttpPost]
         public async Task<JsonResult> UpdateActivityAG(FarmActivitiesAG obj, HttpPostedFileBase ImageFile)
         {
             BALFarmOwner objbalfarm = new BALFarmOwner();
 
-            // Temporary hardcoded farm
-            obj.FarmHouseCode = "FH001";
-
             if (ImageFile != null && ImageFile.ContentLength > 0)
             {
-                // File type validation
                 string ext = Path.GetExtension(ImageFile.FileName).ToLower();
 
                 if (ext != ".jpg" && ext != ".jpeg" && ext != ".png")
@@ -121,15 +182,13 @@ namespace GSTAgroTourism.Controllers
                     Directory.CreateDirectory(farmFolder);
                 }
 
-                string fileName = Guid.NewGuid().ToString() +
-                        Path.GetExtension(ImageFile.FileName);
+                string fileName = Guid.NewGuid().ToString() + Path.GetExtension(ImageFile.FileName);
 
                 string fullPath = Path.Combine(farmFolder, fileName);
 
                 ImageFile.SaveAs(fullPath);
 
-                obj.ImagePath = "/Content/Image/Farms/" +
-                                obj.FarmHouseCode + "/" + fileName;
+                obj.ImagePath = "/Content/Image/Farms/" + obj.FarmHouseCode + "/" + fileName;
             }
 
             await objbalfarm.UpdateActivityAG(obj);
@@ -137,6 +196,21 @@ namespace GSTAgroTourism.Controllers
             return Json(true);
         }
 
+
+        // For filtering activities based on selected farmhouse (AJAX request)
+        public async Task<JsonResult> GetActivitiesByFarmAG(string farmHouseCode)
+        {
+            BALFarmOwner objbalfarm = new BALFarmOwner();
+
+            string ownerCode = Session["FarmOwnerCode"].ToString();
+
+            DataSet ds = await objbalfarm.GetActivitiesAG(ownerCode, farmHouseCode);
+
+            return Json(ds.Tables[0], JsonRequestBehavior.AllowGet);
+        }
+
+
+        // For deleting an activity
         [HttpPost]
         public async Task<JsonResult> DeleteActivityAG(int id)
         {
@@ -146,6 +220,9 @@ namespace GSTAgroTourism.Controllers
 
             return Json(true);
         }
+
+
+        // For activating or deactivating an activity (toggle status)
         [HttpPost]
         public async Task<JsonResult> ToggleActivityAG(int id, bool isActive)
         {
@@ -153,5 +230,6 @@ namespace GSTAgroTourism.Controllers
             await objbalfarm.ToggleActivityAG(id, isActive);
             return Json(true);
         }
+        #endregion
     }
 }

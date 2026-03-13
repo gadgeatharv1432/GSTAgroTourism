@@ -8,20 +8,37 @@
     #editActivityModal .modal-content {
         background: linear-gradient(135deg, #667eea, #764ba2);
     }
-</style>
-<h2>Index</h2>
 
+    .form-error {
+        color: #dc3545;
+        font-size: 13px;
+        margin-top: 4px;
+    }
+
+    .input-error {
+        border: 2px solid #dc3545 !important;
+    }
+
+    .input-valid {
+        border: 2px solid #28a745 !important;
+    }
+</style>
+
+<!-- Button to open Add Activity modal -->
 <button class="btn btn-success" onclick="OpenAddModal()">
     + Add Activity
 </button>
 
+
+<!-- Activity Data Table -->
 <table id="dataTable"
-       class="table table-bordered display"
+       class="table table-hover table-striped"
        style="width:100%">
 
     <thead>
         <tr>
             <th>Sr No.</th>
+            <th>Farmhouse</th>
             <th>Name</th>
             <th>Duration</th>
             <th>Price</th>
@@ -42,6 +59,8 @@
             <tr>
 
                 <td>@sr</td>
+
+                <td>@item.FarmHouseName</td>
 
                 <td>@item.ActivityName</td>
 
@@ -91,6 +110,7 @@
 
 </table>
 
+<!-- Add Activity Modal -->
 <div id="addActivityModal" class="modal fade">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -105,44 +125,92 @@
                 <div class="container-fluid">
 
                     <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-semibold">Farmhouse</label>
+                        <div class="col-sm-8">
+
+                            @Html.DropDownList(
+                             "FarmHouseCode",
+                             (List<SelectListItem>)ViewBag.FarmHouseList,
+                             "-- Select Farmhouse --",
+                             new { @class = "form-control", id = "FarmHouseCode" }
+                         )
+
+                            <div id="FarmHouseCodeError" class="form-error"></div>
+
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
                         <label class="col-sm-4 col-form-label fw-semibold">Start Date</label>
                         <div class="col-sm-8">
-                            <input type="date" id="StartDate" class="form-control">
+                            <input type="date"
+                                   id="StartDate"
+                                   class="form-control">
+
+                            <div id="StartDateError" class="form-error"></div>
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <label class="col-sm-4 col-form-label fw-semibold">End Date</label>
                         <div class="col-sm-8">
-                            <input type="date" id="EndDate" class="form-control">
+                            <input type="date"
+                                   id="EndDate"
+                                   class="form-control">
+
+                            <div id="EndDateError" class="form-error"></div>
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <label class="col-sm-4 col-form-label fw-semibold">Activity Name</label>
                         <div class="col-sm-8">
-                            <input type="text" id="ActivityName" class="form-control" placeholder="Enter activity name">
+
+                            <input type="text"
+                                   id="ActivityName"
+                                   class="form-control"
+                                   placeholder="Enter activity name"
+                                   pattern="^[A-Za-z\s]+$"
+                                   oninput="this.value=this.value.replace(/[^A-Za-z\s]/g,'')">
+
+                            <div id="ActivityNameError" class="form-error"></div>
+
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <label class="col-sm-4 col-form-label fw-semibold">Duration</label>
                         <div class="col-sm-8">
-                            <input type="text" id="Duration" class="form-control" placeholder="Example: 2 hours">
+                            <input type="text"
+                                   id="Duration"
+                                   class="form-control"
+                                   placeholder="Example: 2 Hours"
+                                   pattern="^[0-9A-Za-z\s]+$"
+                                   title="Only numbers and letters allowed">
+                            <div id="DurationError" class="form-error"></div>
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <label class="col-sm-4 col-form-label fw-semibold">Price</label>
                         <div class="col-sm-8">
-                            <input type="number" id="Price" class="form-control" placeholder="Enter price">
+                            <input type="number"
+                                   id="Price"
+                                   class="form-control"
+                                   placeholder="Enter price"
+                                   min="1"
+                                   step="0.01">
+                            <div id="PriceError" class="form-error"></div>
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <label class="col-sm-4 col-form-label fw-semibold">Description</label>
                         <div class="col-sm-8">
-                            <textarea id="Description" rows="3" class="form-control"></textarea>
+                            <textarea id="Description"
+                                      rows="3"
+                                      maxlength="250"
+                                      class="form-control"></textarea>
                         </div>
                     </div>
 
@@ -150,6 +218,7 @@
                         <label class="col-sm-4 col-form-label fw-semibold">Activity Image</label>
                         <div class="col-sm-8">
                             <input type="file" id="ActivityImage" class="form-control" accept=".jpg,.jpeg,.png">
+                            <img id="PreviewImage" style="width:90px;height:60px;display:none;border-radius:5px;margin-top:10px;">
                         </div>
                     </div>
 
@@ -175,6 +244,8 @@
     </div>
 </div>
 
+
+<!-- Edit Activity Modal -->
 <div id="editActivityModal" class="modal fade">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -189,13 +260,28 @@
                 <div class="container-fluid">
 
                     <input type="hidden" id="EditActivityId">
-                    <input type="hidden" id="EditFarmHouseCode">
                     <input type="hidden" id="EditActivityCode">
+
+                    <div class="row mb-3">
+                        <label class="col-sm-4 col-form-label fw-semibold">Farmhouse</label>
+                        <div class="col-sm-8">
+
+                            @Html.DropDownList(
+                                "EditFarmHouseCode",
+                                (List<SelectListItem>)ViewBag.FarmHouseList,
+                                "-- Select Farmhouse --",
+                                new { @class = "form-control", id = "EditFarmHouseCode" }
+                            )
+                            <div id="EditFarmHouseCodeError" class="form-error"></div>
+                        </div>
+                    </div>
 
                     <div class="row mb-3">
                         <label class="col-sm-4 col-form-label fw-semibold">Start Date</label>
                         <div class="col-sm-8">
                             <input type="date" id="EditStartDate" class="form-control">
+
+                            <div id="EditStartDateError" class="form-error"></div>
                         </div>
                     </div>
 
@@ -203,34 +289,53 @@
                         <label class="col-sm-4 col-form-label fw-semibold">End Date</label>
                         <div class="col-sm-8">
                             <input type="date" id="EditEndDate" class="form-control">
+
+                            <div id="EditEndDateError" class="form-error"></div>
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <label class="col-sm-4 col-form-label fw-semibold">Activity Name</label>
                         <div class="col-sm-8">
-                            <input type="text" id="EditActivityName" class="form-control">
+                            <input type="text"
+                                   id="EditActivityName"
+                                   class="form-control"
+                                   pattern="^[A-Za-z\s]+$"
+                                   oninput="this.value=this.value.replace(/[^A-Za-z\s]/g,'')">
+                            <div id="EditActivityNameError" class="form-error"></div>
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <label class="col-sm-4 col-form-label fw-semibold">Duration</label>
                         <div class="col-sm-8">
-                            <input type="text" id="EditDuration" class="form-control">
+                            <input type="text"
+                                   id="EditDuration"
+                                   class="form-control"
+                                   pattern="^[0-9A-Za-z\s]+$">
+                            <div id="EditDurationError" class="form-error"></div>
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <label class="col-sm-4 col-form-label fw-semibold">Price</label>
                         <div class="col-sm-8">
-                            <input type="number" id="EditPrice" class="form-control">
+                            <input type="number"
+                                   id="EditPrice"
+                                   class="form-control"
+                                   min="1"
+                                   step="0.01">
+                            <div id="EditPriceError" class="form-error"></div>
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <label class="col-sm-4 col-form-label fw-semibold">Description</label>
                         <div class="col-sm-8">
-                            <textarea id="EditDescription" rows="3" class="form-control"></textarea>
+                            <textarea id="EditDescription"
+                                      rows="3"
+                                      maxlength="250"
+                                      class="form-control"></textarea>
                         </div>
                     </div>
 
@@ -267,7 +372,12 @@
 
 @section scripts{
 
+    <!-- ============================================= -->
+    <!--            ACTIVITY MANAGEMENT SCRIPTS        -->
+    <!-- ============================================= -->
+
     <script>
+        // Utility function for displaying SweetAlert notifications
         function ShowAlert(type, title, message, reload = false) {
 
             Swal.fire({
@@ -283,6 +393,7 @@
         }
     </script>
     <script>
+        // Opens Add Activity modal and resets all form fields
         function OpenAddModal() {
 
             $("#StartDate").val("");
@@ -293,19 +404,93 @@
             $("#Description").val("");
             $("#ActivityImage").val("");
 
+            $(".form-control").removeClass("input-error input-valid");
+            $(".form-error").text("");
+
             const modal = new bootstrap.Modal(document.getElementById('addActivityModal'));
             modal.show();
         }
     </script>
+
     <script>
 
+        function setError(inputId, message) {
+            $("#" + inputId).removeClass("input-valid").addClass("input-error");
+            $("#" + inputId + "Error").text(message);
+        }
+
+        function setValid(inputId) {
+            $("#" + inputId).removeClass("input-error").addClass("input-valid");
+            $("#" + inputId + "Error").text("");
+        }
+        // Saves new activity using AJAX call
         function SaveActivity() {
+
+            let isValid = true;
+
+            let farm = $("#FarmHouseCode").val();
+            let name = $("#ActivityName").val().trim();
+            let duration = $("#Duration").val().trim();
+            let price = $("#Price").val();
+            let start = $("#StartDate").val();
+            let end = $("#EndDate").val();
+
+            if (!farm) {
+                setError("FarmHouseCode", "Please select farmhouse");
+                isValid = false;
+            }
+            else setValid("FarmHouseCode");
+
+
+            if (!name) {
+                setError("ActivityName", "Activity name required");
+                isValid = false;
+            }
+            else setValid("ActivityName");
+
+
+            if (!duration) {
+                setError("Duration", "Duration required");
+                isValid = false;
+            }
+            else setValid("Duration");
+
+
+            if (!price) {
+                setError("Price", "Price required");
+                isValid = false;
+            }
+            else setValid("Price");
+
+
+            if (!start) {
+                setError("StartDate", "Start date required");
+                isValid = false;
+            }
+            else setValid("StartDate");
+
+
+            if (!end) {
+                setError("EndDate", "End date required");
+                isValid = false;
+            }
+            else if (start && end < start) {
+                setError("EndDate", "End date must be greater than start date");
+                isValid = false;
+            }
+            else setValid("EndDate");
+
+
+            if (!isValid) {
+                return;
+            }
 
             var btn = document.activeElement;
             btn.disabled = true;
 
             var formData = new FormData();
 
+            formData.append("FarmHouseCode", $("#FarmHouseCode").val());
             formData.append("ActivityName", $("#ActivityName").val());
             formData.append("Duration", $("#Duration").val());
             formData.append("Price", $("#Price").val());
@@ -315,7 +500,27 @@
 
             var file = $("#ActivityImage")[0].files[0];
 
-            if (file !== undefined) {
+            if (file) {
+
+                const allowedExtensions = ['jpg', 'jpeg', 'png'];
+                const maxSize = 2 * 1024 * 1024; // 2MB
+
+                let extension = file.name.split('.').pop().toLowerCase();
+
+                if (!allowedExtensions.includes(extension)) {
+
+                    ShowAlert("warning", "Validation", "Only JPG, JPEG and PNG images allowed");
+                    btn.disabled = false;
+                    return;
+                }
+
+                if (file.size > maxSize) {
+
+                    ShowAlert("warning", "Validation", "Image size must be less than 2MB");
+                    btn.disabled = false;
+                    return;
+                }
+
                 formData.append("ImageFile", file);
             }
 
@@ -343,6 +548,7 @@
     </script>
 
     <script>
+        // Loads activity data from server and populates Edit modal
         function EditActivity(id) {
 
             console.log("Edit clicked:", id);
@@ -388,7 +594,58 @@
     </script>
     <script>
 
+        // Updates activity details using AJAX request
         function UpdateActivity() {
+
+
+
+            let isValid = true;
+
+            let farm = $("#EditFarmHouseCode").val();
+            let name = $("#EditActivityName").val().trim();
+            let duration = $("#EditDuration").val().trim();
+            let price = $("#EditPrice").val();
+            let start = $("#EditStartDate").val();
+            let end = $("#EditEndDate").val();
+
+            if (!farm) {
+                setError("EditFarmHouseCode", "Please select farmhouse");
+                isValid = false;
+            } else setValid("EditFarmHouseCode");
+
+            if (!name) {
+                setError("EditActivityName", "Activity name required");
+                isValid = false;
+            } else setValid("EditActivityName");
+
+            if (!duration) {
+                setError("EditDuration", "Duration required");
+                isValid = false;
+            } else setValid("EditDuration");
+
+            if (!price) {
+                setError("EditPrice", "Price required");
+                isValid = false;
+            } else setValid("EditPrice");
+
+            if (!start) {
+                setError("EditStartDate", "Start date required");
+                isValid = false;
+            } else setValid("EditStartDate");
+
+            if (!end) {
+                setError("EditEndDate", "End date required");
+                isValid = false;
+            }
+            else if (start && end < start) {
+                setError("EditEndDate", "End date must be greater than start date");
+                isValid = false;
+            }
+            else setValid("EditEndDate");
+
+            if (!isValid) {
+                return;
+            }
 
             var formData = new FormData();
 
@@ -401,18 +658,27 @@
             formData.append("Description", $("#EditDescription").val());
             var startDate = $("#EditStartDate").val();
             var endDate = $("#EditEndDate").val();
-
-            if (startDate && startDate !== "") {
-                formData.append("StartDate", startDate);
-            }
-
-            if (endDate && endDate !== "") {
-                formData.append("EndDate", endDate);
-            }
-
             var file = $("#EditImage")[0].files[0];
 
-            if (file != undefined) {
+            if (file) {
+
+                const allowedExtensions = ['jpg', 'jpeg', 'png'];
+                const maxSize = 2 * 1024 * 1024;
+
+                let extension = file.name.split('.').pop().toLowerCase();
+
+                if (!allowedExtensions.includes(extension)) {
+
+                    ShowAlert("warning", "Validation", "Only JPG, JPEG and PNG images allowed");
+                    return;
+                }
+
+                if (file.size > maxSize) {
+
+                    ShowAlert("warning", "Validation", "Image must be less than 2MB");
+                    return;
+                }
+
                 formData.append("ImageFile", file);
             }
 
@@ -436,6 +702,8 @@
 
     </script>
     <script>
+
+        // Deletes selected activity after confirmation dialog
         function DeleteActivity(id) {
 
             Swal.fire({
@@ -476,27 +744,34 @@
         }
     </script>
     <script>
+
+        // Activates or deactivates activity
         function ToggleStatus(id, status) {
 
             $.post('/FarmOwner/ToggleActivityAG',
                 {
                     id: id,
                     isActive: status
-                },
-                function () {
+                })
+                .done(function () {
 
-                    ShowAlert(
-                        "success",
-                        "Status Updated",
-                        "",
-                        false
-                    );
+                    let message = status
+                        ? "Activity ACTIVATED successfully"
+                        : "Activity DEACTIVATED successfully";
+
+                    ShowAlert("success", "Success", message, false);
+
+                })
+                .fail(function () {
+
+                    ShowAlert("error", "Error", "Failed to update status", false);
+
                 });
         }
     </script>
 
     <script>
-
+        // Initialize DataTable for activity listing
         $(document).ready(function () {
 
             $('#dataTable').DataTable({
@@ -509,5 +784,97 @@
 
         });
 
+    </script>
+
+    <script>
+
+        $("#FarmHouseCode,#ActivityName,#Duration,#Price,#StartDate,#EndDate")
+            .on("input change", function () {
+
+                let id = $(this).attr("id");
+                let value = $(this).val();
+
+                if (value && value.trim() !== "") {
+                    setValid(id);
+                }
+
+            });
+
+    </script>
+
+    <script>
+
+        $("#EditFarmHouseCode,#EditActivityName,#EditDuration,#EditPrice,#EditStartDate,#EditEndDate")
+            .on("input change", function () {
+
+                let id = $(this).attr("id");
+                let value = $(this).val();
+
+                if (value && value.trim() !== "") {
+                    setValid(id);
+                }
+
+            });
+
+    </script>
+
+    <script>
+
+        $("#StartDate").on("change", function () {
+
+            $("#EndDate").trigger("change");
+
+        });
+
+    </script>
+
+    <script>
+
+        $("#EditStartDate").on("change", function () {
+
+            $("#EditEndDate").trigger("change");
+
+        });
+
+    </script>
+
+    <script>
+        $("#ActivityImage").on("change", function () {
+
+            let file = this.files[0];
+
+            if (!file) return;
+
+            const allowedExtensions = ['jpg', 'jpeg', 'png'];
+            const maxSize = 2 * 1024 * 1024;
+
+            let extension = file.name.split('.').pop().toLowerCase();
+
+            if (!allowedExtensions.includes(extension)) {
+
+                ShowAlert("warning", "Validation", "Only JPG, JPEG and PNG allowed");
+                this.value = "";
+                return;
+            }
+
+            if (file.size > maxSize) {
+
+                ShowAlert("warning", "Validation", "Image must be below 2MB");
+                this.value = "";
+                return;
+            }
+
+            let reader = new FileReader();
+
+            reader.onload = function (e) {
+
+                $("#PreviewImage")
+                    .attr("src", e.target.result)
+                    .show();
+            }
+
+            reader.readAsDataURL(file);
+
+        });
     </script>
 }

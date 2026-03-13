@@ -190,6 +190,7 @@
     <Content Include="Views\Visitor\TrustSafety.cshtml" />
     <Content Include="Views\FarmOwner\ActivityAG.cshtml" />
     <Content Include="Views\Shared\FarmOwner.cshtml" />
+    <Content Include="Views\FarmOwner\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
