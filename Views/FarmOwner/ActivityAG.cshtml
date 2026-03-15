@@ -22,6 +22,10 @@
     .input-valid {
         border: 2px solid #28a745 !important;
     }
+
+    .dt-buttons {
+        display: none;
+    }
 </style>
 
 <!-- Button to open Add Activity modal -->
@@ -29,6 +33,38 @@
     + Add Activity
 </button>
 
+<div class="d-flex align-items-center gap-3 mb-3 flex-wrap" id="exportToolbar">
+
+    <!-- Farmhouse Filter -->
+    <div>
+        <label class="fw-semibold me-1">Farmhouse:</label>
+
+        @Html.DropDownList(
+            "FilterFarmHouse",
+            (List<SelectListItem>)ViewBag.FarmHouseList,
+            "All Farmhouses",
+            new { @class = "form-control", id = "FilterFarmHouse", style = "width:200px; display:inline-block;" }
+        )
+    </div>
+
+    <!-- Export Buttons -->
+    <button id="btnPdf" class="btn btn-danger btn-sm">
+        <i class="fa fa-file-pdf"></i> PDF
+    </button>
+
+    <button id="btnExcel" class="btn btn-success btn-sm">
+        <i class="fa fa-file-excel"></i> Excel
+    </button>
+
+    <button id="btnCsv" class="btn btn-primary btn-sm">
+        <i class="fa fa-file-csv"></i> CSV
+    </button>
+
+    <button id="btnPrint" class="btn btn-secondary btn-sm">
+        <i class="fa fa-print"></i> Print
+    </button>
+
+</div>
 
 <!-- Activity Data Table -->
 <table id="dataTable"
@@ -37,6 +73,9 @@
 
     <thead>
         <tr>
+            <th style="width:40px">
+                <input type="checkbox" id="selectAll">
+            </th>
             <th>Sr No.</th>
             <th>Farmhouse</th>
             <th>Name</th>
@@ -56,7 +95,12 @@
 
         @foreach (var item in Model)
         {
-            <tr>
+            <tr data-farmhouse="@item.FarmHouseCode">
+                <td>
+                    <input type="checkbox"
+                           class="rowCheckbox"
+                           value="@item.ActivityId">
+                </td>
 
                 <td>@sr</td>
 
@@ -772,20 +816,157 @@
 
     <script>
         // Initialize DataTable for activity listing
+        var table;
+
         $(document).ready(function () {
 
-            $('#dataTable').DataTable({
+            table = $('#dataTable').DataTable({
                 responsive: true,
                 pageLength: 10,
                 ordering: false,
                 lengthChange: true,
-                pagingType: "simple_numbers"
+                pagingType: "simple_numbers",
+
+                columnDefs: [{
+                    orderable: false,
+                    targets: 0
+                }],
+
+                dom: 'Bfrtip',
+                buttons: [
+
+                    {
+                        extend: 'pdfHtml5',
+                        title: 'Farm Activities',
+                        exportOptions: {
+                            columns: ':visible',
+                            rows: function (idx, data, node) {
+
+                                return $(node).find('.rowCheckbox').prop('checked');
+
+                            }
+                        }
+                    },
+
+                    {
+                        extend: 'excelHtml5',
+                        title: 'Farm Activities',
+                        exportOptions: {
+                            columns: ':visible',
+                            rows: function (idx, data, node) {
+
+                                return $(node).find('.rowCheckbox').prop('checked');
+
+                            }
+                        }
+                    },
+
+                    {
+                        extend: 'csvHtml5',
+                        title: 'Farm Activities',
+                        exportOptions: {
+                            columns: ':visible',
+                            rows: function (idx, data, node) {
+
+                                return $(node).find('.rowCheckbox').prop('checked');
+
+                            }
+                        }
+                    },
+
+                    {
+                        extend: 'print',
+                        title: 'Farm Activities',
+                        exportOptions: {
+                            columns: ':visible',
+                            rows: function (idx, data, node) {
+
+                                return $(node).find('.rowCheckbox').prop('checked');
+
+                            }
+                        }
+                    }
+
+                ]
             });
 
         });
 
+        $("#btnPdf").click(function () {
+
+            if (!hasSelectedRows()) {
+
+                Swal.fire("Select rows", "Please select at least one activity", "warning");
+                return;
+            }
+
+            table.button('.buttons-pdf').trigger();
+
+        });
+
+        $("#btnExcel").click(function () {
+
+            if (!hasSelectedRows()) {
+
+                Swal.fire("Select rows", "Please select at least one activity", "warning");
+                return;
+            }
+
+            table.button('.buttons-excel').trigger();
+
+        });
+
+        $("#btnCsv").click(function () {
+
+            if (!hasSelectedRows()) {
+
+                Swal.fire("Select rows", "Please select at least one activity", "warning");
+                return;
+            }
+
+            table.button('.buttons-csv').trigger();
+
+        });
+
+        $("#btnPrint").click(function () {
+
+            if (!hasSelectedRows()) {
+
+                Swal.fire("Select rows", "Please select at least one activity", "warning");
+                return;
+            }
+
+            table.button('.buttons-print').trigger();
+
+        });
+
+        function hasSelectedRows() {
+
+            return $(".rowCheckbox:checked").length > 0;
+
+        }
     </script>
 
+    
+    <script>
+        // Select All Checkbox
+
+        $("#selectAll").on("change", function () {
+
+            $(".rowCheckbox").prop("checked", this.checked);
+
+        });
+
+
+        // Uncheck selectAll if one row unchecked
+        $(document).on("change", ".rowCheckbox", function () {
+
+            if (!this.checked) {
+                $("#selectAll").prop("checked", false);
+            }
+
+        });
+    </script>
     <script>
 
         $("#FarmHouseCode,#ActivityName,#Duration,#Price,#StartDate,#EndDate")
@@ -877,4 +1058,38 @@
 
         });
     </script>
+
+    <script>
+        // Farmhouse Filter
+        $("#FilterFarmHouse").on("change", function () {
+
+            var farmCode = $(this).val();
+
+            if (farmCode === "") {
+
+                table.rows().every(function () {
+                    $(this.node()).show();
+                });
+
+            }
+            else {
+
+                table.rows().every(function () {
+
+                    var rowFarm = $(this.node()).data("farmhouse");
+
+                    if (rowFarm == farmCode) {
+                        $(this.node()).show();
+                    }
+                    else {
+                        $(this.node()).hide();
+                    }
+
+                });
+
+            }
+
+        });
+    </script>
+
 }
