@@ -118,6 +118,20 @@ namespace GSTAgroTourism.Controllers
         [HttpPost]
         public async Task<JsonResult> InsertActivityAG(FarmActivitiesAG obj, HttpPostedFileBase ImageFile)
         {
+            if (!obj.StartDate.HasValue || !obj.EndDate.HasValue)
+            {
+                return Json(new { success = false, message = "Dates are required" });
+            }
+
+            if (obj.StartDate.Value.Date < DateTime.Today)
+            {
+                return Json(new { success = false, message = "Start date cannot be before today" });
+            }
+
+            if (obj.EndDate.Value.Date < obj.StartDate.Value.Date)
+            {
+                return Json(new { success = false, message = "End date must be after start date" });
+            }
             BALFarmOwner objbalfarm = new BALFarmOwner();
 
             obj.ActivityCode = "AC" + DateTime.Now.Ticks.ToString().Substring(8);
@@ -126,6 +140,13 @@ namespace GSTAgroTourism.Controllers
 
             if (ImageFile != null && ImageFile.ContentLength > 0)
             {
+                string ext = Path.GetExtension(ImageFile.FileName).ToLower();
+
+                if (ext != ".jpg" && ext != ".jpeg" && ext != ".png")
+                {
+                    return Json(new { success = false, message = "Only JPG, JPEG, PNG allowed" });
+                }
+
                 string rootPath = Server.MapPath("~/Content/Image/Farms/");
                 string farmFolder = Path.Combine(rootPath, obj.FarmHouseCode);
 
@@ -144,7 +165,7 @@ namespace GSTAgroTourism.Controllers
 
             await objbalfarm.InsertActivityAG(obj);
 
-            return Json(true);
+            return Json(new { success = true });
         }
 
 
@@ -155,7 +176,19 @@ namespace GSTAgroTourism.Controllers
 
             var activity = await objbalfarm.GetActivityByIdAG(id);
 
-            return Json(activity, JsonRequestBehavior.AllowGet);
+            return Json(new
+            {
+                activity.ActivityId,
+                activity.ActivityCode,
+                activity.FarmHouseCode,
+                activity.ActivityName,
+                activity.Duration,
+                activity.Price,
+                StartDate = activity.StartDate?.ToString("yyyy-MM-dd"),
+                EndDate = activity.EndDate?.ToString("yyyy-MM-dd"),
+                activity.Description,
+                activity.ImagePath
+            }, JsonRequestBehavior.AllowGet);
         }
 
 
@@ -163,6 +196,21 @@ namespace GSTAgroTourism.Controllers
         [HttpPost]
         public async Task<JsonResult> UpdateActivityAG(FarmActivitiesAG obj, HttpPostedFileBase ImageFile)
         {
+            if (!obj.StartDate.HasValue || !obj.EndDate.HasValue)
+            {
+                return Json(new { success = false, message = "Dates are required" });
+            }
+
+            if (obj.StartDate.Value.Date < DateTime.Today)
+            {
+                return Json(new { success = false, message = "Start date cannot be before today" });
+            }
+
+            if (obj.EndDate.Value.Date < obj.StartDate.Value.Date)
+            {
+                return Json(new { success = false, message = "End date must be after start date" });
+            }
+
             BALFarmOwner objbalfarm = new BALFarmOwner();
 
             if (ImageFile != null && ImageFile.ContentLength > 0)
@@ -193,7 +241,7 @@ namespace GSTAgroTourism.Controllers
 
             await objbalfarm.UpdateActivityAG(obj);
 
-            return Json(true);
+            return Json(new { success = true });
         }
 
 

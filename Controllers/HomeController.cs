@@ -26,5 +26,9 @@ namespace GSTAgroTourism.Controllers
 
             return View();
         }
+        public ActionResult Temp2()
+        {
+            return View();
+        }
     }
 }

@@ -37,15 +37,28 @@
         border: 1px solid #28a745;
         border-radius: 10px;
         background: white;
+        padding: 12px 15px;
+        margin-bottom: 10px;
     }
     .dataTables_length select {
-        appearance: auto !important;
-        -webkit-appearance: auto !important;
-        -moz-appearance: none;
         background-image: none !important;
-        padding-right: 10px;
+    }
+    #dataTable td,
+    #dataTable th {
+        padding: 6px 8px !important;
+        font-size: 13px;
+        vertical-align: middle;
     }
 
+    .btn-sm {
+        padding: 3px 8px !important;
+        font-size: 12px;
+    }
+
+    #dataTable thead th {
+        font-size: 15px;
+        padding: 4px;
+    }
     /* Export Buttons */
 
     .export-btn {
@@ -86,18 +99,6 @@
             color: #fff;
         }
 
-    /* CSV */
-
-    .csv-btn {
-        border-color: #007bff;
-        color: #007bff;
-    }
-
-        .csv-btn:hover {
-            background: #007bff;
-            color: #fff;
-        }
-
     /* Print */
 
     .print-btn {
@@ -109,6 +110,53 @@
             background: #6c757d;
             color: #fff;
         }
+
+    /* Responsive Toggle Switch */
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 2.8em; /* scalable */
+        height: 1.4em;
+    }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        inset: 0;
+        background: linear-gradient(135deg, #ccc, #bbb);
+        transition: 0.4s;
+        border-radius: 2em;
+    }
+
+        /* Circle */
+        .slider:before {
+            content: "";
+            position: absolute;
+            height: 1em;
+            width: 1em;
+            left: 0.2em;
+            bottom: 0.2em;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+    /* ON STATE */
+    .switch input:checked + .slider {
+        background: linear-gradient(135deg, #00cfff, #003847);
+    }
+
+        /* MOVE CIRCLE */
+        .switch input:checked + .slider:before {
+            transform: translateX(1.4em);
+        }
 </style>
 
 <!-- Button to open Add Activity modal -->
@@ -118,7 +166,7 @@
 
 <div class="container-fluid" id="filters">
 
-    <div class="d-flex align-items-center gap-3 mb-3 flex-wrap" id="exportToolbar">
+    <div class="d-flex align-items-center gap-lg-2 mb-3 flex-wrap" id="exportToolbar">
 
         <!-- Farmhouse Filter -->
         <div>
@@ -139,7 +187,7 @@
 
             <input type="date"
                    id="filterStartDate"
-                   class="form-control form-control-sm"
+                   class="form-control form-control-sm" 
                    style="width:130px; display:inline-block;">
         </div>
 
@@ -148,7 +196,7 @@
 
             <input type="date"
                    id="filterEndDate"
-                   class="form-control form-control-sm"
+                   class="form-control form-control-sm" 
                    style="width:130px; display:inline-block;">
         </div>
 
@@ -166,10 +214,6 @@
             <i class="fas fa-file-excel"></i>
         </button>
 
-        <button id="btnCsv" class="export-btn csv-btn" data-bs-toggle="tooltip" title="Export CSV">
-            <i class="fas fa-file-csv"></i>
-        </button>
-
         <button id="btnPrint" class="export-btn print-btn" data-bs-toggle="tooltip" title="Print">
             <i class="fas fa-print"></i>
         </button>
@@ -179,7 +223,7 @@
 
 <!-- Activity Data Table -->
 <table id="dataTable"
-       class="table table-hover table-striped"
+       class="table table-md table-hover table-striped"
        style="width:100%">
 
     <thead>
@@ -187,17 +231,17 @@
             <th style="width:40px">
                 <input type="checkbox" id="selectAll">
             </th>
-            <th>Sr No.</th>
-            <th>Farmhouse</th>
-            <th>Name</th>
-            <th>Duration</th>
-            <th>Price</th>
-            <th>Start Date</th>
-            <th>End Date</th>
-            <th>Description</th>
-            <th>Image</th>
-            <th>Status</th>
-            <th style="width:150px;">Action</th>
+            <th style="width:60px">Sr No.</th>
+            <th style="width:120px">Farmhouse</th>
+            <th style="width:120px">Name</th>
+            <th style="width:90px">Duration</th>
+            <th style="width:80px">Price</th>
+            <th style="width:100px">Start Date</th>
+            <th style="width:100px">End Date</th>
+            <th style="width:150px">Description</th>
+            <th style="width:80px">Image</th>
+            <th style="width:70px">Status</th>
+            <th style="width:130px;">Action</th>
         </tr>
     </thead>
 
@@ -231,18 +275,21 @@
                 <td>
                     @if (!string.IsNullOrEmpty(item.ImagePath))
                     {
-                        <img src="@item.ImagePath" style="width:80px;height:55px;object-fit:cover;border-radius:6px;">
+                        <img src="@item.ImagePath" style="width:60px;height:40px;object-fit:cover;border-radius:4px;">
                     }
                 </td>
 
                 <td>
-                    <input type="checkbox"
-                           onchange="ToggleStatus(@item.ActivityId,this.checked)"
-                           @(item.IsActive ? "checked" : "") />
+                    <label class="switch">
+                        <input type="checkbox"
+                               onchange="ToggleStatus(@item.ActivityId,this.checked)"
+                               @(item.IsActive ? "checked" : "")>
+                        <span class="slider"></span>
+                    </label>
                 </td>
 
                 <td>
-                    <div style="display:flex;gap:6px;justify-content:center;white-space:nowrap;">
+                    <div style="display:flex;gap:4px;justify-content:center;white-space:nowrap;">
 
                         <button type="button"
                                 class="btn btn-outline-primary btn-rounded btn-sm"
@@ -270,7 +317,7 @@
 </table>
 
 <!-- Add Activity Modal -->
-<div id="addActivityModal" class="modal fade">
+<div id="addActivityModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-fullscreen-lg-down">
         <div class="modal-content">
 
@@ -409,7 +456,7 @@
 
 
 <!-- Edit Activity Modal -->
-<div id="editActivityModal" class="modal fade">
+<div id="editActivityModal" class="modal fade" data-bs-backdrop="static" data-bs-keyboard="false">
     <div class="modal-dialog modal-fullscreen-lg-down">
         <div class="modal-content">
 
@@ -563,22 +610,30 @@
         // Opens Add Activity modal and resets all form fields
         function OpenAddModal() {
 
+            let today = new Date().toISOString().split('T')[0];
             $("#StartDate").val("");
             $("#EndDate").val("");
+            $("#StartDate").attr("min", today);
+            $("#EndDate").removeAttr("min");
+            $("#EndDate").prop("disabled", true);
+            $("#FarmHouseCode").val("");
             $("#ActivityName").val("");
             $("#Duration").val("");
             $("#Price").val("");
             $("#Description").val("");
             $("#ActivityImage").val("");
-
+            $("#PreviewImage").hide();
             $(".form-control").removeClass("input-error input-valid");
             $(".form-error").text("");
-
             const modal = new bootstrap.Modal(document.getElementById('addActivityModal'));
             modal.show();
         }
     </script>
-
+    <script>
+        $(document).on("keydown", "input[type='date']", function (e) {
+            e.preventDefault(); // block typing
+        });
+    </script>
     <script>
 
         function setError(inputId, message) {
@@ -590,7 +645,7 @@
             $("#" + inputId).removeClass("input-error").addClass("input-valid");
             $("#" + inputId + "Error").text("");
         }
-        // Saves new activity using AJAX call
+
         function SaveActivity() {
 
             let isValid = true;
@@ -601,44 +656,42 @@
             let price = $("#Price").val();
             let start = $("#StartDate").val();
             let end = $("#EndDate").val();
-
+            let today = new Date().toISOString().split('T')[0];
             if (!farm) {
                 setError("FarmHouseCode", "Please select farmhouse");
                 isValid = false;
             }
             else setValid("FarmHouseCode");
-
-
             if (!name) {
                 setError("ActivityName", "Activity name required");
                 isValid = false;
             }
             else setValid("ActivityName");
-
-
             if (!duration) {
                 setError("Duration", "Duration required");
                 isValid = false;
             }
             else setValid("Duration");
-
-
             if (!price) {
                 setError("Price", "Price required");
                 isValid = false;
             }
             else setValid("Price");
-
-
             if (!start) {
                 setError("StartDate", "Start date required");
                 isValid = false;
             }
+            else if (start < today) {
+                setError("StartDate", "Start date cannot be in the past");
+                isValid = false;
+            }
             else setValid("StartDate");
-
-
             if (!end) {
                 setError("EndDate", "End date required");
+                isValid = false;
+            }
+            else if (end < today) {
+                setError("EndDate", "End date cannot be in the past");
                 isValid = false;
             }
             else if (start && end < start) {
@@ -647,23 +700,22 @@
             }
             else setValid("EndDate");
 
-
             if (!isValid) {
                 return;
             }
 
-            var btn = document.activeElement;
+            var btn = $("#addActivityModal .btn-outline-success")[0];
             btn.disabled = true;
 
             var formData = new FormData();
 
-            formData.append("FarmHouseCode", $("#FarmHouseCode").val());
-            formData.append("ActivityName", $("#ActivityName").val());
-            formData.append("Duration", $("#Duration").val());
-            formData.append("Price", $("#Price").val());
+            formData.append("FarmHouseCode", farm);
+            formData.append("ActivityName", name);
+            formData.append("Duration", duration);
+            formData.append("Price", price);
             formData.append("Description", $("#Description").val());
-            formData.append("StartDate", $("#StartDate").val());
-            formData.append("EndDate", $("#EndDate").val());
+            formData.append("StartDate", start);
+            formData.append("EndDate", end);
 
             var file = $("#ActivityImage")[0].files[0];
 
@@ -675,14 +727,12 @@
                 let extension = file.name.split('.').pop().toLowerCase();
 
                 if (!allowedExtensions.includes(extension)) {
-
                     ShowAlert("warning", "Validation", "Only JPG, JPEG and PNG images allowed");
                     btn.disabled = false;
                     return;
                 }
 
                 if (file.size > maxSize) {
-
                     ShowAlert("warning", "Validation", "Image size must be less than 2MB");
                     btn.disabled = false;
                     return;
@@ -697,21 +747,23 @@
                 data: formData,
                 contentType: false,
                 processData: false,
-                success: function () {
+                success: function (res) {
 
-                    ShowAlert(
-                        "success",
-                        "Saved!",
-                        "Activity added successfully",
-                        true
-                    );
+                    if (res.success) {
+                        ShowAlert("success", "Saved!", "Activity added successfully", true);
+                    } else {
+                        ShowAlert("error", "Validation Error", res.message);
+                    }
+                    
+                },
+                error: function () {
+                    ShowAlert("error", "Error", "Server error occurred");
                 },
                 complete: function () {
                     btn.disabled = false;
                 }
             });
         }
-
     </script>
 
     <script>
@@ -733,21 +785,42 @@
                 $("#EditPrice").val(data.Price);
                 $("#EditDescription").val(data.Description);
 
+                // Start Date
                 if (data.StartDate) {
-                    var sd = new Date(data.StartDate);
+                    let sd = new Date(data.StartDate);
 
-                    if (!isNaN(sd.getTime())) {
-                        $("#EditStartDate").val(sd.toISOString().split('T')[0]);
-                    }
+                    let localStart = sd.getFullYear() + '-' +
+                        String(sd.getMonth() + 1).padStart(2, '0') + '-' +
+                        String(sd.getDate()).padStart(2, '0');
+
+                    $("#EditStartDate").val(localStart);
                 }
 
+                // End Date
                 if (data.EndDate) {
-                    var ed = new Date(data.EndDate);
+                    let ed = new Date(data.EndDate);
 
-                    if (!isNaN(ed.getTime())) {
-                        $("#EditEndDate").val(ed.toISOString().split('T')[0]);
-                    }
+                    let localEnd = ed.getFullYear() + '-' +
+                        String(ed.getMonth() + 1).padStart(2, '0') + '-' +
+                        String(ed.getDate()).padStart(2, '0');
+
+                    $("#EditEndDate").val(localEnd);
                 }
+                // 🔥 ADD THIS BLOCK HERE (EXACTLY HERE)
+                let startDate = $("#EditStartDate").val();
+
+                if (startDate) {
+
+                    $("#EditEndDate").prop("disabled", false);
+                    $("#EditEndDate").attr("min", startDate);
+
+                } else {
+
+                    $("#EditEndDate").prop("disabled", true);
+                    $("#EditEndDate").val("");
+                }
+                let today = new Date().toISOString().split('T')[0];
+                $("#EditStartDate").attr("min", today);
 
                 if (data.ImagePath) {
                     $("#EditPreviewImage").attr("src", data.ImagePath).show();
@@ -756,6 +829,7 @@
                 var editModal = new bootstrap.Modal(document.getElementById('editActivityModal'));
                 editModal.show();
 
+                
             });
         }
     </script>
@@ -795,13 +869,26 @@
                 isValid = false;
             } else setValid("EditPrice");
 
+            let today = new Date().toISOString().split('T')[0];
+
+            // Start Date Validation
             if (!start) {
                 setError("EditStartDate", "Start date required");
                 isValid = false;
-            } else setValid("EditStartDate");
+            }
+            else if (start < today) {
+                setError("EditStartDate", "Start date cannot be in the past");
+                isValid = false;
+            }
+            else setValid("EditStartDate");
 
+            // End Date Validation
             if (!end) {
                 setError("EditEndDate", "End date required");
+                isValid = false;
+            }
+            else if (end < today) {
+                setError("EditEndDate", "End date cannot be in the past");
                 isValid = false;
             }
             else if (start && end < start) {
@@ -857,14 +944,14 @@
                 data: formData,
                 contentType: false,
                 processData: false,
-                success: function () {
+                success: function (res) {
 
-                    ShowAlert(
-                        "success",
-                        "Updated!",
-                        "Activity updated successfully",
-                        true
-                    );
+                    if (res.success) {
+                        ShowAlert("success", "Updated!", "Activity updated successfully", true);
+                    } else {
+                        ShowAlert("error", "Validation Error", res.message);
+                    }
+
                 }
             });
         }
@@ -942,37 +1029,39 @@
     <script>
 
         // Date Range Filtering
-        $.fn.dataTable.ext.search.push(
+        $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
 
-            function (settings, data, dataIndex) {
+            // 🔹 Farmhouse Filter
+            var selectedFarm = $("#FilterFarmHouse").val();
+            var rowFarmName = data[2]; // Farmhouse column text
+            var selectedFarm = $("#FilterFarmHouse option:selected").text();
 
-                var startFilter = $('#filterStartDate').val();
-                var endFilter = $('#filterEndDate').val();
+            if (selectedFarm && selectedFarm !== "All Farmhouses" && rowFarmName.trim() !== selectedFarm.trim()) {
+                return false;
+            }
 
-                var startDate = data[6]; // Start Date column
-                var endDate = data[7];   // End Date column
+            // 🔹 Date Filter
+            var startFilter = $('#filterStartDate').val();
+            var endFilter = $('#filterEndDate').val();
 
-                if (!startFilter && !endFilter) {
-                    return true;
-                }
+            var startDate = data[6];
+            var endDate = data[7];
 
-                var activityStart = new Date(startDate);
-                var activityEnd = new Date(endDate);
-
-                var filterStart = startFilter ? new Date(startFilter) : null;
-                var filterEnd = endFilter ? new Date(endFilter) : null;
-
-                if (filterStart && activityStart < filterStart) {
-                    return false;
-                }
-
-                if (filterEnd && activityEnd > filterEnd) {
-                    return false;
-                }
-
+            if (!startFilter && !endFilter) {
                 return true;
             }
-        );
+
+            var activityStart = startDate ? new Date(startDate + "T00:00:00") : null;
+            var activityEnd = endDate ? new Date(endDate + "T00:00:00") : null;
+
+            var filterStart = startFilter ? new Date(startFilter + "T00:00:00") : null;
+            var filterEnd = endFilter ? new Date(endFilter + "T00:00:00") : null;
+
+            if (filterStart && activityStart < filterStart) return false;
+            if (filterEnd && activityEnd > filterEnd) return false;
+
+            return true;
+        });
 
         function getExportDateTime() {
 
@@ -981,10 +1070,13 @@
             return now.toLocaleDateString() + " " + now.toLocaleTimeString();
 
         }
+        $("#FilterFarmHouse").on("change", function () {
+            table.draw();
+        });
 
         // Initialize DataTable for activity listing
         var table;
-
+        var exportRowIndex = 0;
         $(document).ready(function () {
 
             table = $('#dataTable').DataTable({
@@ -994,13 +1086,11 @@
                 ordering: false,
                 lengthChange: true,
                 pagingType: "simple_numbers",
-
                 columnDefs: [{
                     orderable: false,
                     targets: 0
                 }],
-
-                dom: '<"d-flex justify-content-between align-items-center mb-2"lf>rtipB',
+                dom: '<"row mb-2"<"col-md-6 d-flex align-items-center"l><"col-md-6 text-end"f>>rtipB',
                 buttons: [
 
                     {
@@ -1015,13 +1105,25 @@
                                 fontSize: 10
                             });
 
+                            exportRowIndex = 0; // RESET
                         },
                         exportOptions: {
-                            columns: [1, 2, 3, 4, 5, 6, 7, 8],
+                            columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
                             rows: function (idx, data, node) {
-
                                 return $(node).find('.rowCheckbox').prop('checked');
+                            },
+                            format: {
+                                body: function (data, row, column, node) {
 
+                                    if (column === 1) {
+
+                                        exportRowIndex++;
+
+                                        return exportRowIndex.toString(); 
+                                    }
+
+                                    return $(node).text().trim(); 
+                                }
                             }
                         }
                     },
@@ -1030,35 +1132,28 @@
                         extend: 'excelHtml5',
                         title: 'Farm Activities',
                         messageTop: function () {
-
                             return 'Downloaded: ' + getExportDateTime();
-
                         },
                         exportOptions: {
-                            columns: [1, 2, 3, 4, 5, 6, 7, 8],
+                            columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
                             rows: function (idx, data, node) {
-
                                 return $(node).find('.rowCheckbox').prop('checked');
+                            },
+                            format: {
+                                body: function (data, row, column, node) {
 
+                                    if (column === 1) { // ✅ FIXED
+
+                                        exportRowIndex++;
+                                        return exportRowIndex.toString();
+                                    }
+
+                                    return $(node).text().trim(); // ✅ CLEAN DATA
+                                }
                             }
-                        }
-                    },
-
-                    {
-                        extend: 'csvHtml5',
-                        title: 'Farm Activities',
-                        messageTop: function () {
-
-                            return 'Downloaded: ' + getExportDateTime();
-
                         },
-                        exportOptions: {
-                            columns: [1, 2, 3, 4, 5, 6, 7, 8],
-                            rows: function (idx, data, node) {
-
-                                return $(node).find('.rowCheckbox').prop('checked');
-
-                            }
+                        customize: function () {
+                            exportRowIndex = 0;
                         }
                     },
 
@@ -1066,17 +1161,28 @@
                         extend: 'print',
                         title: 'Farm Activities',
                         messageTop: function () {
-
                             return 'Downloaded: ' + getExportDateTime();
-
                         },
                         exportOptions: {
-                            columns: [1, 2, 3, 4, 5, 6, 7, 8],
+                            columns: [0, 1, 2, 3, 4, 5, 6, 7, 8],
                             rows: function (idx, data, node) {
-
                                 return $(node).find('.rowCheckbox').prop('checked');
+                            },
+                            format: {
+                                body: function (data, row, column, node) {
 
+                                    if (column === 1) {
+
+                                        exportRowIndex++;
+                                        return exportRowIndex.toString();
+                                    }
+
+                                    return $(node).text().trim();
+                                }
                             }
+                        },
+                        customize: function () {
+                            exportRowIndex = 0;
                         }
                     }
 
@@ -1109,18 +1215,6 @@
 
         });
 
-        $("#btnCsv").click(function () {
-
-            if (!hasSelectedRows()) {
-
-                Swal.fire("Select rows", "Please select at least one activity", "warning");
-                return;
-            }
-
-            table.button('.buttons-csv').trigger();
-
-        });
-
         $("#btnPrint").click(function () {
 
             if (!hasSelectedRows()) {
@@ -1138,9 +1232,6 @@
             return $(".rowCheckbox:checked").length > 0;
 
         }
-
-
-
     </script>
 
     <script>
@@ -1154,44 +1245,17 @@
 
         $("#clearDateFilter").click(function () {
 
-            /* 1️⃣ Clear Date Filters */
-
+            // Reset filters
+            $("#FilterFarmHouse").val("");
             $("#filterStartDate").val("");
             $("#filterEndDate").val("");
 
-
-
-            /* 2️⃣ Reset Farmhouse Dropdown */
-
-            $("#FilterFarmHouse").val("");
-
-
-
-            /* 3️⃣ Reset Row Selections */
-
+            // Reset checkboxes
             $(".rowCheckbox").prop("checked", false);
-
-
-
-            /* 4️⃣ Reset Select-All Checkbox */
-
             $("#selectAll").prop("checked", false);
 
-
-
-            /* 5️⃣ Show All Rows (remove farmhouse filtering) */
-
-            table.rows().every(function () {
-
-                $(this.node()).show();
-
-            });
-
-
-
-            /* 6️⃣ Refresh DataTable */
-
-            table.draw();
+            // Redraw table properly
+            table.search('').columns().search('').draw();
 
         });
     </script>
@@ -1250,27 +1314,49 @@
 
         $("#StartDate").on("change", function () {
 
-            var startDate = $(this).val();
-
-            $("#EndDate").attr("min", startDate);
-
-            if ($("#EndDate").val() < startDate) {
+            let startDate = $(this).val();
+            if (!startDate) {
+                $("#EndDate").prop("disabled", true);
                 $("#EndDate").val("");
+                return;
+            }
+            $("#EndDate").prop("disabled", false);
+            $("#EndDate").attr("min", startDate);
+            if ($("#EndDate").val() && $("#EndDate").val() < startDate) {
+                $("#EndDate").val("");
+            }
+        });
+    </script>
+    <script>
+        $("#EndDate").on("change", function () {
+
+            let start = $("#StartDate").val();
+            let end = $(this).val();
+
+            if (start && end < start) {
+                ShowAlert("warning", "Validation", "End date cannot be before Start date");
+                $(this).val("");
             }
 
         });
-
     </script>
-
     <script>
 
         $("#EditStartDate").on("change", function () {
 
-            var startDate = $(this).val();
+            let startDate = $(this).val();
+
+            if (!startDate) {
+                $("#EditEndDate").prop("disabled", true);
+                $("#EditEndDate").val("");
+                return;
+            }
+
+            $("#EditEndDate").prop("disabled", false);
 
             $("#EditEndDate").attr("min", startDate);
 
-            if ($("#EditEndDate").val() < startDate) {
+            if ($("#EditEndDate").val() && $("#EditEndDate").val() < startDate) {
                 $("#EditEndDate").val("");
             }
 
@@ -1318,37 +1404,5 @@
         });
     </script>
 
-    <script>
-        // Farmhouse Filter
-        $("#FilterFarmHouse").on("change", function () {
-
-            var farmCode = $(this).val();
-
-            if (farmCode === "") {
-
-                table.rows().every(function () {
-                    $(this.node()).show();
-                });
-
-            }
-            else {
-
-                table.rows().every(function () {
-
-                    var rowFarm = $(this.node()).data("farmhouse");
-
-                    if (rowFarm == farmCode) {
-                        $(this.node()).show();
-                    }
-                    else {
-                        $(this.node()).hide();
-                    }
-
-                });
-
-            }
-
-        });
-    </script>
 
 }

@@ -146,6 +146,7 @@
     <Content Include="Content\bootstrap.rtl.css" />
     <Content Include="Content\bootstrap.rtl.min.css" />
     <Content Include="Content\CSS\FarmOwner.css" />
+    <Content Include="Content\CSS\Temp2.css" />
     <Content Include="Content\CSS\Visitor.css" />
     <Content Include="Content\js\FarmOwner.js" />
     <Content Include="Content\js\Visitor.js" />
@@ -191,6 +192,7 @@
     <Content Include="Views\FarmOwner\ActivityAG.cshtml" />
     <Content Include="Views\Shared\FarmOwner.cshtml" />
     <Content Include="Views\FarmOwner\Index.cshtml" />
+    <Content Include="Views\Home\Temp2.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
