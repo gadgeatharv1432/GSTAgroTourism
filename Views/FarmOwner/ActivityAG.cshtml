@@ -1307,7 +1307,9 @@
         $("#EndDate").on("change", function () {
             let start = $("#StartDate").val();
             let end = $(this).val();
-            if (start && end < start) {
+            let startDate = start ? toDate(start) : null;
+            let endDate = end ? toDate(end) : null;
+            if (startDate && endDate && endDate < startDate) {
                 ShowAlert("warning", "Validation", "End date cannot be before Start date");
                 $(this).val("");
             }
@@ -1322,7 +1324,10 @@
             }
             $("#EditEndDate").prop("disabled", false);
             $('#EditEndDate').datepicker('setStartDate', toDate(startDate));
-            if ($("#EditEndDate").val() && $("#EditEndDate").val() < startDate) {
+            let endVal = $("#EditEndDate").val();
+            let startObj = toDate(startDate);
+            let endObj = endVal ? toDate(endVal) : null;
+            if (endObj && endObj < startObj) {
                 $("#EditEndDate").val("");
             }
         });
