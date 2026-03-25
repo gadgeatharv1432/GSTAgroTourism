@@ -40,9 +40,11 @@
         padding: 12px 15px;
         margin-bottom: 10px;
     }
+
     .dataTables_length select {
         background-image: none !important;
     }
+    
     #dataTable td,
     #dataTable th {
         padding: 6px 8px !important;
@@ -157,6 +159,39 @@
         .switch input:checked + .slider:before {
             transform: translateX(1.4em);
         }
+    /* CALENDAR */
+    .datepicker-dropdown {
+        z-index: 9999 !important;
+    }
+
+    .date-input {
+        padding-right: 35px;
+    }
+
+    .calendar-icon {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #000;
+    }
+    .datepicker {
+        border-radius: 10px;
+        padding: 10px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+        .datepicker table tr td.active,
+        .datepicker table tr td.active:hover {
+            background-color: #0d6efd !important;
+            color: #fff !important;
+            border-radius: 6px;
+        }
+
+        .datepicker table tr td.today {
+            background-color: #e9f5ff !important;
+            border-radius: 6px;
+        }
 </style>
 
 <!-- Button to open Add Activity modal -->
@@ -185,19 +220,25 @@
         <div>
             <label class="fw-semibold me-1">From:</label>
 
-            <input type="date"
-                   id="filterStartDate"
-                   class="form-control form-control-sm" 
-                   style="width:130px; display:inline-block;">
+            <div class="position-relative" style="display:inline-block; width:130px;">
+                <input type="text"
+                       id="filterStartDate"
+                       class="form-control form-control-sm date-input"
+                       placeholder="dd-mm-yyyy">
+                <i class="fa fa-calendar calendar-icon"></i>
+            </div>
         </div>
 
         <div>
             <label class="fw-semibold me-1">To:</label>
 
-            <input type="date"
-                   id="filterEndDate"
-                   class="form-control form-control-sm" 
-                   style="width:130px; display:inline-block;">
+            <div class="position-relative" style="display:inline-block; width:130px;">
+                <input type="text"
+                       id="filterEndDate"
+                       class="form-control form-control-sm date-input"
+                       placeholder="dd-mm-yyyy">
+                <i class="fa fa-calendar calendar-icon"></i>
+            </div>
         </div>
 
         <button class="btn btn-outline-danger btn-sm"
@@ -348,23 +389,33 @@
 
                     <div class="row mb-3">
                         <label class="col-sm-4 col-form-label fw-semibold">Start Date</label>
-                        <div class="col-sm-8">
-                            <input type="date"
+                        <div class="col-sm-8 position-relative">
+
+                            <input type="text"
                                    id="StartDate"
-                                   class="form-control">
+                                   class="form-control date-input"
+                                   placeholder="dd-mm-yyyy">
+
+                            <i class="fa fa-calendar calendar-icon"></i>
 
                             <div id="StartDateError" class="form-error"></div>
+
                         </div>
                     </div>
 
                     <div class="row mb-3">
                         <label class="col-sm-4 col-form-label fw-semibold">End Date</label>
-                        <div class="col-sm-8">
-                            <input type="date"
+                        <div class="col-sm-8 position-relative">
+
+                            <input type="text"
                                    id="EndDate"
-                                   class="form-control">
+                                   class="form-control date-input"
+                                   placeholder="dd-mm-yyyy">
+
+                            <i class="fa fa-calendar calendar-icon"></i>
 
                             <div id="EndDateError" class="form-error"></div>
+
                         </div>
                     </div>
 
@@ -488,8 +539,14 @@
 
                     <div class="row mb-2">
                         <label class="col-sm-4 col-form-label fw-semibold">Start Date</label>
-                        <div class="col-sm-8">
-                            <input type="date" id="EditStartDate" class="form-control">
+                        <div class="col-sm-8 position-relative">
+
+                            <input type="text"
+                                   id="EditStartDate"
+                                   class="form-control date-input"
+                                   placeholder="dd-mm-yyyy">
+
+                            <i class="fa fa-calendar calendar-icon"></i>
 
                             <div id="EditStartDateError" class="form-error"></div>
                         </div>
@@ -497,8 +554,14 @@
 
                     <div class="row mb-2">
                         <label class="col-sm-4 col-form-label fw-semibold">End Date</label>
-                        <div class="col-sm-8">
-                            <input type="date" id="EditEndDate" class="form-control">
+                        <div class="col-sm-8 position-relative">
+
+                            <input type="text"
+                                   id="EditEndDate"
+                                   class="form-control date-input"
+                                   placeholder="dd-mm-yyyy">
+
+                            <i class="fa fa-calendar calendar-icon"></i>
 
                             <div id="EditEndDateError" class="form-error"></div>
                         </div>
@@ -585,13 +648,8 @@
 </div>
 
 @section scripts{
-
-    <!-- ============================================= -->
-    <!--            ACTIVITY MANAGEMENT SCRIPTS        -->
-    <!-- ============================================= -->
-
     <script>
-        // Utility function for displaying SweetAlert notifications
+// Utility function for displaying SweetAlert notifications
         function ShowAlert(type, title, message, reload = false) {
 
             Swal.fire({
@@ -605,16 +663,37 @@
                     location.reload();
             });
         }
-    </script>
-    <script>
-        // Opens Add Activity modal and resets all form fields
+
+// Convert UI (dd-mm-yyyy) into (yyyy-MM-dd)
+        function convertToISO(dateStr) {
+            if (!dateStr) return null;
+
+            let parts = dateStr.split("-");
+            return parts[2] + "-" + parts[1] + "-" + parts[0];
+        }
+// Convert date strings into JavaScript Date objects
+        function toDate(dateStr) {
+            if (!dateStr) return null;
+            let parts = dateStr.split("-");
+            if (parts[0].length === 4) {
+                return new Date(parts[0], parts[1] - 1, parts[2]);
+            }
+            return new Date(parts[2], parts[1] - 1, parts[0]);
+        }
+// Generate current date comparisons
+        function today() {
+            let t = new Date();
+            t.setHours(0, 0, 0, 0);
+            return t;
+        }
+
+// Opens Add Activity modal and resets all form fields
         function OpenAddModal() {
 
-            let today = new Date().toISOString().split('T')[0];
             $("#StartDate").val("");
             $("#EndDate").val("");
-            $("#StartDate").attr("min", today);
-            $("#EndDate").removeAttr("min");
+            $('#StartDate').datepicker('setStartDate', today());
+            $("#EndDate").prop("disabled", true).val("");
             $("#EndDate").prop("disabled", true);
             $("#FarmHouseCode").val("");
             $("#ActivityName").val("");
@@ -628,119 +707,128 @@
             const modal = new bootstrap.Modal(document.getElementById('addActivityModal'));
             modal.show();
         }
-    </script>
-    <script>
-        $(document).on("keydown", "input[type='date']", function (e) {
-            e.preventDefault(); // block typing
-        });
-    </script>
-    <script>
 
+        $(document).ready(function () {
+// FILTER date
+            $('#filterStartDate, #filterEndDate').datepicker({
+                format: 'dd-mm-yyyy',
+                autoclose: true,
+                todayHighlight: true
+            });
+// ADD date
+            $('#StartDate').datepicker({
+                format: 'dd-mm-yyyy',
+                autoclose: true,
+                todayHighlight: true,
+                startDate: today()
+            });
+            $('#EndDate').datepicker({
+                format: 'dd-mm-yyyy',
+                autoclose: true,
+                todayHighlight: true
+            });
+// EDIT date
+            $('#EditStartDate').datepicker({
+                format: 'dd-mm-yyyy',
+                autoclose: true,
+                todayHighlight: true,
+                startDate: today()
+            });
+            $('#EditEndDate').datepicker({
+                format: 'dd-mm-yyyy',
+                autoclose: true,
+                todayHighlight: true
+            });
+        });
         function setError(inputId, message) {
             $("#" + inputId).removeClass("input-valid").addClass("input-error");
             $("#" + inputId + "Error").text(message);
         }
-
         function setValid(inputId) {
             $("#" + inputId).removeClass("input-error").addClass("input-valid");
             $("#" + inputId + "Error").text("");
         }
-
+//Validate activity form inputs, prepare form data, and submit 
         function SaveActivity() {
-
             let isValid = true;
-
             let farm = $("#FarmHouseCode").val();
             let name = $("#ActivityName").val().trim();
             let duration = $("#Duration").val().trim();
             let price = $("#Price").val();
             let start = $("#StartDate").val();
             let end = $("#EndDate").val();
-            let today = new Date().toISOString().split('T')[0];
+            let startDateObj = start ? toDate(start) : null;
+            let endDateObj = end ? toDate(end) : null;
+// BASIC VALIDATION
             if (!farm) {
                 setError("FarmHouseCode", "Please select farmhouse");
                 isValid = false;
-            }
-            else setValid("FarmHouseCode");
+            } else setValid("FarmHouseCode");
+
             if (!name) {
                 setError("ActivityName", "Activity name required");
                 isValid = false;
-            }
-            else setValid("ActivityName");
+            } else setValid("ActivityName");
+
             if (!duration) {
                 setError("Duration", "Duration required");
                 isValid = false;
-            }
-            else setValid("Duration");
+            } else setValid("Duration");
+
             if (!price) {
                 setError("Price", "Price required");
                 isValid = false;
-            }
-            else setValid("Price");
+            } else setValid("Price");
+// DATE VALIDATION 
             if (!start) {
                 setError("StartDate", "Start date required");
                 isValid = false;
             }
-            else if (start < today) {
+            else if (startDateObj < today()) {
                 setError("StartDate", "Start date cannot be in the past");
                 isValid = false;
             }
             else setValid("StartDate");
+
             if (!end) {
                 setError("EndDate", "End date required");
                 isValid = false;
             }
-            else if (end < today) {
-                setError("EndDate", "End date cannot be in the past");
-                isValid = false;
-            }
-            else if (start && end < start) {
+            else if (endDateObj < startDateObj) {
                 setError("EndDate", "End date must be greater than start date");
                 isValid = false;
             }
             else setValid("EndDate");
 
-            if (!isValid) {
-                return;
-            }
-
+            if (!isValid) return;
             var btn = $("#addActivityModal .btn-outline-success")[0];
             btn.disabled = true;
-
             var formData = new FormData();
-
             formData.append("FarmHouseCode", farm);
             formData.append("ActivityName", name);
             formData.append("Duration", duration);
             formData.append("Price", price);
             formData.append("Description", $("#Description").val());
-            formData.append("StartDate", start);
-            formData.append("EndDate", end);
-
+            formData.append("StartDate", convertToISO(start));
+            formData.append("EndDate", convertToISO(end));
+// ===== IMAGE VALIDATION =====
             var file = $("#ActivityImage")[0].files[0];
-
             if (file) {
-
                 const allowedExtensions = ['jpg', 'jpeg', 'png'];
-                const maxSize = 2 * 1024 * 1024; // 2MB
-
+                const maxSize = 2 * 1024 * 1024;
                 let extension = file.name.split('.').pop().toLowerCase();
-
                 if (!allowedExtensions.includes(extension)) {
                     ShowAlert("warning", "Validation", "Only JPG, JPEG and PNG images allowed");
                     btn.disabled = false;
                     return;
                 }
-
                 if (file.size > maxSize) {
                     ShowAlert("warning", "Validation", "Image size must be less than 2MB");
                     btn.disabled = false;
                     return;
                 }
-
                 formData.append("ImageFile", file);
             }
-
             $.ajax({
                 url: '/FarmOwner/InsertActivityAG',
                 type: 'POST',
@@ -754,7 +842,7 @@
                     } else {
                         ShowAlert("error", "Validation Error", res.message);
                     }
-                    
+
                 },
                 error: function () {
                     ShowAlert("error", "Error", "Server error occurred");
@@ -764,91 +852,69 @@
                 }
             });
         }
-    </script>
-
-    <script>
-        // Loads activity data from server and populates Edit modal
+// Fetch selected activity data, populate edit form fields, and open edit modal
         function EditActivity(id) {
-
             console.log("Edit clicked:", id);
-
             $.get('/FarmOwner/GetActivityByIdAG', { id: id }, function (data) {
 
                 console.log(data);
-
                 $("#EditActivityId").val(data.ActivityId);
                 $("#EditFarmHouseCode").val(data.FarmHouseCode);
                 $("#EditActivityCode").val(data.ActivityCode);
-
                 $("#EditActivityName").val(data.ActivityName);
                 $("#EditDuration").val(data.Duration);
                 $("#EditPrice").val(data.Price);
                 $("#EditDescription").val(data.Description);
-
-                // Start Date
+ // ===== START DATE =====
                 if (data.StartDate) {
                     let sd = new Date(data.StartDate);
 
-                    let localStart = sd.getFullYear() + '-' +
+                    let localStart =
+                        String(sd.getDate()).padStart(2, '0') + '-' +
                         String(sd.getMonth() + 1).padStart(2, '0') + '-' +
-                        String(sd.getDate()).padStart(2, '0');
+                        sd.getFullYear();
 
                     $("#EditStartDate").val(localStart);
                 }
-
-                // End Date
+// ===== END DATE =====
                 if (data.EndDate) {
                     let ed = new Date(data.EndDate);
-
-                    let localEnd = ed.getFullYear() + '-' +
+                    let localEnd =
+                        String(ed.getDate()).padStart(2, '0') + '-' +
                         String(ed.getMonth() + 1).padStart(2, '0') + '-' +
-                        String(ed.getDate()).padStart(2, '0');
-
+                        ed.getFullYear();
                     $("#EditEndDate").val(localEnd);
                 }
-                // 🔥 ADD THIS BLOCK HERE (EXACTLY HERE)
+                $('#EditStartDate').datepicker('setStartDate', today());
                 let startDate = $("#EditStartDate").val();
-
                 if (startDate) {
-
                     $("#EditEndDate").prop("disabled", false);
-                    $("#EditEndDate").attr("min", startDate);
-
+                    $('#EditEndDate').datepicker('setStartDate', toDate(startDate));
                 } else {
-
                     $("#EditEndDate").prop("disabled", true);
                     $("#EditEndDate").val("");
                 }
-                let today = new Date().toISOString().split('T')[0];
-                $("#EditStartDate").attr("min", today);
-
+// ===== IMAGE =====
                 if (data.ImagePath) {
                     $("#EditPreviewImage").attr("src", data.ImagePath).show();
                 }
-
+// ===== OPEN MODAL =====
                 var editModal = new bootstrap.Modal(document.getElementById('editActivityModal'));
                 editModal.show();
-
-                
             });
         }
-    </script>
-    <script>
-
-        // Updates activity details using AJAX request
-        function UpdateActivity() {
-
-
-
+// Validate edit form inputs, prepare updated activity data, and submit
+         function UpdateActivity() {
             let isValid = true;
-
             let farm = $("#EditFarmHouseCode").val();
             let name = $("#EditActivityName").val().trim();
             let duration = $("#EditDuration").val().trim();
             let price = $("#EditPrice").val();
             let start = $("#EditStartDate").val();
             let end = $("#EditEndDate").val();
-
+            let startDateObj = start ? toDate(start) : null;
+            let endDateObj = end ? toDate(end) : null;
+ // ===== BASIC VALIDATION =====
             if (!farm) {
                 setError("EditFarmHouseCode", "Please select farmhouse");
                 isValid = false;
@@ -868,100 +934,73 @@
                 setError("EditPrice", "Price required");
                 isValid = false;
             } else setValid("EditPrice");
-
-            let today = new Date().toISOString().split('T')[0];
-
-            // Start Date Validation
+// ===== DATE VALIDATION (CORRECTED) =====
             if (!start) {
                 setError("EditStartDate", "Start date required");
                 isValid = false;
             }
-            else if (start < today) {
+            else if (startDateObj < today()) {
                 setError("EditStartDate", "Start date cannot be in the past");
                 isValid = false;
             }
             else setValid("EditStartDate");
 
-            // End Date Validation
             if (!end) {
                 setError("EditEndDate", "End date required");
                 isValid = false;
             }
-            else if (end < today) {
-                setError("EditEndDate", "End date cannot be in the past");
-                isValid = false;
-            }
-            else if (start && end < start) {
+            else if (endDateObj < startDateObj) {
                 setError("EditEndDate", "End date must be greater than start date");
                 isValid = false;
             }
             else setValid("EditEndDate");
 
-            if (!isValid) {
-                return;
-            }
-
+            if (!isValid) return;
+// ===== FORM DATA =====
             var formData = new FormData();
-
             formData.append("ActivityId", $("#EditActivityId").val());
-            formData.append("FarmHouseCode", $("#EditFarmHouseCode").val());
+            formData.append("FarmHouseCode", farm);
             formData.append("ActivityCode", $("#EditActivityCode").val());
-            formData.append("ActivityName", $("#EditActivityName").val());
-            formData.append("Duration", $("#EditDuration").val());
-            formData.append("Price", $("#EditPrice").val());
+            formData.append("ActivityName", name);
+            formData.append("Duration", duration);
+            formData.append("Price", price);
             formData.append("Description", $("#EditDescription").val());
-            var startDate = $("#EditStartDate").val();
-            var endDate = $("#EditEndDate").val();
-            formData.append("StartDate", startDate);
-            formData.append("EndDate", endDate);
+            formData.append("StartDate", convertToISO(start));
+             formData.append("EndDate", convertToISO(end));
+// ===== IMAGE VALIDATION =====
             var file = $("#EditImage")[0].files[0];
-
             if (file) {
-
                 const allowedExtensions = ['jpg', 'jpeg', 'png'];
                 const maxSize = 2 * 1024 * 1024;
-
                 let extension = file.name.split('.').pop().toLowerCase();
-
                 if (!allowedExtensions.includes(extension)) {
-
                     ShowAlert("warning", "Validation", "Only JPG, JPEG and PNG images allowed");
                     return;
                 }
-
                 if (file.size > maxSize) {
-
                     ShowAlert("warning", "Validation", "Image must be less than 2MB");
                     return;
                 }
-
                 formData.append("ImageFile", file);
             }
-
             $.ajax({
                 url: '/FarmOwner/UpdateActivityAG',
                 type: 'POST',
                 data: formData,
                 contentType: false,
                 processData: false,
-                success: function (res) {
-
+                success: function (res)
+                {
                     if (res.success) {
                         ShowAlert("success", "Updated!", "Activity updated successfully", true);
                     } else {
                         ShowAlert("error", "Validation Error", res.message);
                     }
-
                 }
             });
         }
-
-    </script>
-    <script>
-
-        // Deletes selected activity after confirmation dialog
+// Trigger user confirmation and execute activity deletion 
         function DeleteActivity(id) {
-
             Swal.fire({
                 title: "Delete Activity?",
                 text: "This action cannot be undone",
@@ -969,100 +1008,75 @@
                 showCancelButton: true,
                 confirmButtonColor: "#d33",
                 confirmButtonText: "Yes, delete it"
-            }).then((result) => {
-
-                if (result.isConfirmed) {
-
-                    // Loader
-                    Swal.fire({
-                        title: 'Deleting...',
-                        allowOutsideClick: false,
-                        didOpen: () => {
-                            Swal.showLoading()
-                        }
+            })
+            .then((result) =>
+            {
+            if (result.isConfirmed) {
+// Loader
+                Swal.fire({
+                    title: 'Deleting...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading()
+                    }
+                });
+                $.post('/FarmOwner/DeleteActivityAG',
+                    { id: id },
+                    function () {
+                        ShowAlert(
+                            "success",
+                            "Deleted!",
+                            "Activity deleted successfully",
+                            true
+                        );
                     });
-
-                    $.post('/FarmOwner/DeleteActivityAG',
-                        { id: id },
-                        function () {
-
-                            ShowAlert(
-                                "success",
-                                "Deleted!",
-                                "Activity deleted successfully",
-                                true
-                            );
-
-                        });
-
                 }
             });
         }
-    </script>
-    <script>
-
-        // Activates or deactivates activity
+// Activates or deactivates activity
         function ToggleStatus(id, status) {
-
             $.post('/FarmOwner/ToggleActivityAG',
                 {
                     id: id,
                     isActive: status
                 })
-                .done(function () {
-
-                    let message = status
-                        ? "Activity ACTIVATED successfully"
-                        : "Activity DEACTIVATED successfully";
-
-                    ShowAlert("success", "Success", message, false);
-
-                })
-                .fail(function () {
-
-                    ShowAlert("error", "Error", "Failed to update status", false);
-
-                });
+            .done(function () {
+                let message = status
+                    ? "Activity ACTIVATED successfully"
+                    : "Activity DEACTIVATED successfully";
+                ShowAlert("success", "Success", message, false);
+            })
+            .fail(function () {
+                ShowAlert("error", "Error", "Failed to update status", false);
+            });
         }
-    </script>
-
-    <script>
-
-        // Date Range Filtering
+// Date Range Filtering
         $.fn.dataTable.ext.search.push(function (settings, data, dataIndex) {
-
-            // 🔹 Farmhouse Filter
-            var selectedFarm = $("#FilterFarmHouse").val();
-            var rowFarmName = data[2]; // Farmhouse column text
-            var selectedFarm = $("#FilterFarmHouse option:selected").text();
-
-            if (selectedFarm && selectedFarm !== "All Farmhouses" && rowFarmName.trim() !== selectedFarm.trim()) {
+            var selectedFarmText = $("#FilterFarmHouse option:selected").text();
+            var rowFarmName = data[2];
+            if (selectedFarmText && selectedFarmText !== "All Farmhouses" &&
+                rowFarmName.trim() !== selectedFarmText.trim()) {
                 return false;
             }
-
-            // 🔹 Date Filter
             var startFilter = $('#filterStartDate').val();
             var endFilter = $('#filterEndDate').val();
-
             var startDate = data[6];
             var endDate = data[7];
-
-            if (!startFilter && !endFilter) {
-                return true;
+            var activityStart = startDate ? toDate(startDate) : null;
+            var activityEnd = endDate ? toDate(endDate) : null;
+            var filterStart = startFilter ? toDate(startFilter) : null;
+            var filterEnd = endFilter ? toDate(endFilter) : null;
+            if (filterStart && filterEnd && filterEnd < filterStart) {
+                return false;
             }
-
-            var activityStart = startDate ? new Date(startDate + "T00:00:00") : null;
-            var activityEnd = endDate ? new Date(endDate + "T00:00:00") : null;
-
-            var filterStart = startFilter ? new Date(startFilter + "T00:00:00") : null;
-            var filterEnd = endFilter ? new Date(endFilter + "T00:00:00") : null;
-
-            if (filterStart && activityStart < filterStart) return false;
-            if (filterEnd && activityEnd > filterEnd) return false;
-
+            if (filterStart && activityStart && activityStart < filterStart) {
+                return false;
+            }
+            if (filterEnd && activityStart && activityStart > filterEnd) {
+                return false;
+            }
             return true;
         });
-
         function getExportDateTime() {
 
             const now = new Date();
@@ -1073,12 +1087,10 @@
         $("#FilterFarmHouse").on("change", function () {
             table.draw();
         });
-
-        // Initialize DataTable for activity listing
+// Initialize DataTable with pagination, export options
         var table;
         var exportRowIndex = 0;
         $(document).ready(function () {
-
             table = $('#dataTable').DataTable({
                 responsive: true,
                 pageLength: 10,
@@ -1092,7 +1104,7 @@
                 }],
                 dom: '<"row mb-2"<"col-md-6 d-flex align-items-center"l><"col-md-6 text-end"f>>rtipB',
                 buttons: [
-
+// PDF 
                     {
                         extend: 'pdfHtml5',
                         title: 'Farm Activities',
@@ -1114,20 +1126,16 @@
                             },
                             format: {
                                 body: function (data, row, column, node) {
-
                                     if (column === 1) {
-
                                         exportRowIndex++;
-
-                                        return exportRowIndex.toString(); 
+                                        return exportRowIndex.toString();
                                     }
-
-                                    return $(node).text().trim(); 
+                                    return $(node).text().trim();
                                 }
                             }
                         }
                     },
-
+// EXCEL
                     {
                         extend: 'excelHtml5',
                         title: 'Farm Activities',
@@ -1141,14 +1149,12 @@
                             },
                             format: {
                                 body: function (data, row, column, node) {
-
-                                    if (column === 1) { // ✅ FIXED
+                                    if (column === 1) { 
 
                                         exportRowIndex++;
                                         return exportRowIndex.toString();
                                     }
-
-                                    return $(node).text().trim(); // ✅ CLEAN DATA
+                                    return $(node).text().trim();
                                 }
                             }
                         },
@@ -1156,7 +1162,7 @@
                             exportRowIndex = 0;
                         }
                     },
-
+// PRINT
                     {
                         extend: 'print',
                         title: 'Farm Activities',
@@ -1190,7 +1196,7 @@
             });
 
         });
-
+// Trigger PDF export only if at least one row is selected
         $("#btnPdf").click(function () {
 
             if (!hasSelectedRows()) {
@@ -1202,7 +1208,7 @@
             table.button('.buttons-pdf').trigger();
 
         });
-
+// Trigger Excel export only if at least one row is selected
         $("#btnExcel").click(function () {
 
             if (!hasSelectedRows()) {
@@ -1214,7 +1220,7 @@
             table.button('.buttons-excel').trigger();
 
         });
-
+// Trigger print export only if at least one row is selected
         $("#btnPrint").click(function () {
 
             if (!hasSelectedRows()) {
@@ -1232,44 +1238,30 @@
             return $(".rowCheckbox:checked").length > 0;
 
         }
-    </script>
 
-    <script>
-
-        // Apply date filter when date changes
+// Apply date filter when date changes
         $("#filterStartDate, #filterEndDate").on("change", function () {
 
             table.draw();
 
         });
-
+// Reset all filters
         $("#clearDateFilter").click(function () {
-
-            // Reset filters
             $("#FilterFarmHouse").val("");
             $("#filterStartDate").val("");
             $("#filterEndDate").val("");
-
-            // Reset checkboxes
             $(".rowCheckbox").prop("checked", false);
             $("#selectAll").prop("checked", false);
-
-            // Redraw table properly
             table.search('').columns().search('').draw();
-
         });
-    </script>
-    <script>
-        // Select All Checkbox
 
+// Select All Checkbox
         $("#selectAll").on("change", function () {
 
             $(".rowCheckbox").prop("checked", this.checked);
 
         });
-
-
-        // Uncheck selectAll if one row unchecked
+// Uncheck selectAll if one row unchecked
         $(document).on("change", ".rowCheckbox", function () {
 
             if (!this.checked) {
@@ -1277,132 +1269,87 @@
             }
 
         });
-    </script>
-    <script>
 
         $("#FarmHouseCode,#ActivityName,#Duration,#Price,#StartDate,#EndDate")
             .on("input change", function () {
 
                 let id = $(this).attr("id");
                 let value = $(this).val();
-
                 if (value && value.trim() !== "") {
                     setValid(id);
                 }
-
             });
-
-    </script>
-
-    <script>
 
         $("#EditFarmHouseCode,#EditActivityName,#EditDuration,#EditPrice,#EditStartDate,#EditEndDate")
             .on("input change", function () {
-
                 let id = $(this).attr("id");
                 let value = $(this).val();
 
                 if (value && value.trim() !== "") {
                     setValid(id);
                 }
-
             });
 
-    </script>
-
-    <script>
-
         $("#StartDate").on("change", function () {
-
             let startDate = $(this).val();
             if (!startDate) {
-                $("#EndDate").prop("disabled", true);
-                $("#EndDate").val("");
+                $("#EndDate").prop("disabled", true).val("");
                 return;
             }
             $("#EndDate").prop("disabled", false);
-            $("#EndDate").attr("min", startDate);
-            if ($("#EndDate").val() && $("#EndDate").val() < startDate) {
+            $('#EndDate').datepicker('setStartDate', toDate(startDate));
+            let endDate = $("#EndDate").val();
+            if (endDate && toDate(endDate) < toDate(startDate)) {
                 $("#EndDate").val("");
             }
         });
-    </script>
-    <script>
-        $("#EndDate").on("change", function () {
 
+        $("#EndDate").on("change", function () {
             let start = $("#StartDate").val();
             let end = $(this).val();
-
             if (start && end < start) {
                 ShowAlert("warning", "Validation", "End date cannot be before Start date");
                 $(this).val("");
             }
-
         });
-    </script>
-    <script>
 
         $("#EditStartDate").on("change", function () {
-
             let startDate = $(this).val();
-
             if (!startDate) {
                 $("#EditEndDate").prop("disabled", true);
                 $("#EditEndDate").val("");
                 return;
             }
-
             $("#EditEndDate").prop("disabled", false);
-
-            $("#EditEndDate").attr("min", startDate);
-
+            $('#EditEndDate').datepicker('setStartDate', toDate(startDate));
             if ($("#EditEndDate").val() && $("#EditEndDate").val() < startDate) {
                 $("#EditEndDate").val("");
             }
-
         });
-
-    </script>
-
-    <script>
+// Validate image file type and size
         $("#ActivityImage").on("change", function () {
-
             let file = this.files[0];
-
             if (!file) return;
-
             const allowedExtensions = ['jpg', 'jpeg', 'png'];
             const maxSize = 2 * 1024 * 1024;
-
             let extension = file.name.split('.').pop().toLowerCase();
-
             if (!allowedExtensions.includes(extension)) {
-
                 ShowAlert("warning", "Validation", "Only JPG, JPEG and PNG allowed");
                 this.value = "";
                 return;
             }
-
             if (file.size > maxSize) {
-
                 ShowAlert("warning", "Validation", "Image must be below 2MB");
                 this.value = "";
                 return;
             }
-
             let reader = new FileReader();
-
             reader.onload = function (e) {
-
                 $("#PreviewImage")
                     .attr("src", e.target.result)
                     .show();
             }
-
             reader.readAsDataURL(file);
-
         });
     </script>
-
-
 }

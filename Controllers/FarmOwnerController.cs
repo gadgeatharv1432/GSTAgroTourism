@@ -31,7 +31,7 @@ namespace GSTAgroTourism.Controllers
 
         // For authenticating user login (FarmOwner or Visitor)
         [HttpPost]
-        public async Task<ActionResult> Login(LoginRS model)
+        public async Task<ActionResult> Login(LoginRS model, string returnUrl)
         {
             BALFarmOwner objbalfarm = new BALFarmOwner();
             DataSet ds = await objbalfarm.Login(model);
@@ -47,10 +47,16 @@ namespace GSTAgroTourism.Controllers
             }
             else if (ds.Tables.Count > 1 && ds.Tables[1].Rows.Count > 0)
             {
-                // VISITOR LOGIN
+                // VISITOR
                 Session["UserId"] = ds.Tables[1].Rows[0]["UserId"];
                 Session["Email"] = ds.Tables[1].Rows[0]["Email"];
                 Session["VisitorCode"] = ds.Tables[1].Rows[0]["VisitorCode"];
+                Session["VisitorName"] = ds.Tables[1].Rows[0]["FullName"];
+                TempData["Login"] = "Success";
+
+                //        // 🔥 IMPORTANT PART
+                if (!string.IsNullOrEmpty(returnUrl))
+                    return Redirect(returnUrl);
 
                 return RedirectToAction("AboutUs", "Visitor");
             }
